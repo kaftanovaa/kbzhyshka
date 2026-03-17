@@ -7,7 +7,9 @@ def get_main_keyboard() -> InlineKeyboardMarkup:
     """Главное меню."""
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Сегодня", callback_data="today")],
-        [InlineKeyboardButton(text="Открыть календарь", callback_data="calendar_main")]
+        [InlineKeyboardButton(text="Открыть календарь", callback_data="calendar_main")],
+        [InlineKeyboardButton(text="📊 Статистика за неделю", callback_data="stats_week")],
+        [InlineKeyboardButton(text="📈 Статистика за месяц", callback_data="stats_month")]
     ])
     return keyboard
 
@@ -18,6 +20,24 @@ def get_today_keyboard() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="Добавить ням-ням", callback_data="add_food")],
         [InlineKeyboardButton(text="Удалить ням-ням", callback_data="remove_food")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="back_main")]
+    ])
+    return keyboard
+
+
+def get_add_food_type_keyboard() -> InlineKeyboardMarkup:
+    """Выбор типа ввода: на порцию или на 100г."""
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🍽 На порцию", callback_data="add_per_serving")],
+        [InlineKeyboardButton(text="⚖ На 100г", callback_data="add_per_100g")],
+        [InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_add")]
+    ])
+    return keyboard
+
+
+def get_remove_food_keyboard() -> InlineKeyboardMarkup:
+    """Клавиатура для удаления."""
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_remove")]
     ])
     return keyboard
 
@@ -54,7 +74,6 @@ def get_calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
     
     # Дни месяца
     today = date.today()
-    dates_with_data = None  # Будет заполнено в хендлере
     
     for week in month_days:
         row = []
@@ -62,7 +81,6 @@ def get_calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
             if day == 0:
                 row.append(InlineKeyboardButton(text="·", callback_data="cal_empty"))
             else:
-                # Проверяем, есть ли данные за этот день
                 day_str = f"{year}-{month:02d}-{day:02d}"
                 is_today = (day == today.day and month == today.month and year == today.year)
                 
@@ -85,12 +103,41 @@ def get_calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
 
 
 def get_day_view_keyboard(year: int, month: int, day: int) -> InlineKeyboardMarkup:
-    """Клавиатура для просмотра конкретного дня."""
+    """Клавиатура для просмотра конкретного дня с навигацией."""
+    # Вычисляем предыдущий и следующий день
+    current_date = date(year, month, day)
+    prev_date = current_date - timedelta(days=1)
+    next_date = current_date + timedelta(days=1)
+    
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Добавить ням-ням", callback_data=f"add_food_day:{year}:{month}:{day}")],
         [InlineKeyboardButton(text="Удалить ням-ням", callback_data=f"remove_food_day:{year}:{month}:{day}")],
-        [InlineKeyboardButton(text="🔙 К календарю", callback_data=f"calendar_month:{year}:{month}"),
-         InlineKeyboardButton(text="🏠 На главную", callback_data="back_main")]
+        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{prev_date.year}:{prev_date.month}:{prev_date.day}"),
+         InlineKeyboardButton(text="🔙 К календарю", callback_data=f"calendar_month:{year}:{month}"),
+         InlineKeyboardButton(text="▶", callback_data=f"day_next:{next_date.year}:{next_date.month}:{next_date.day}")],
+        [InlineKeyboardButton(text="🏠 На главную", callback_data="back_main")]
+    ])
+    return keyboard
+
+
+def get_day_view_keyboard_with_add_type(year: int, month: int, day: int, per_100g: bool = False) -> InlineKeyboardMarkup:
+    """Клавиатура для дня с выбором типа добавления."""
+    current_date = date(year, month, day)
+    prev_date = current_date - timedelta(days=1)
+    next_date = current_date + timedelta(days=1)
+    
+    if per_100g:
+        add_callback = f"add_100g_day:{year}:{month}:{day}"
+    else:
+        add_callback = f"add_serving_day:{year}:{month}:{day}"
+    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🍽 На порцию", callback_data=f"add_serving_day:{year}:{month}:{day}")],
+        [InlineKeyboardButton(text="⚖ На 100г", callback_data=f"add_100g_day:{year}:{month}:{day}")],
+        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{prev_date.year}:{prev_date.month}:{prev_date.day}"),
+         InlineKeyboardButton(text="🔙 К календарю", callback_data=f"calendar_month:{year}:{month}"),
+         InlineKeyboardButton(text="▶", callback_data=f"day_next:{next_date.year}:{next_date.month}:{next_date.day}")],
+        [InlineKeyboardButton(text="🏠 На главную", callback_data="back_main")]
     ])
     return keyboard
 
@@ -98,6 +145,14 @@ def get_day_view_keyboard(year: int, month: int, day: int) -> InlineKeyboardMark
 def get_back_keyboard() -> InlineKeyboardMarkup:
     """Простая кнопка 'Назад'."""
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=" Назад", callback_data="back_main")]
+        [InlineKeyboardButton(text="🔙 Назад", callback_data="back_main")]
+    ])
+    return keyboard
+
+
+def get_cancel_keyboard() -> InlineKeyboardMarkup:
+    """Кнопка отмены."""
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_action")]
     ])
     return keyboard

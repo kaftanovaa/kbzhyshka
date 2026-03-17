@@ -156,6 +156,52 @@ def get_dates_with_entries(user_id: int, year: int, month: int) -> list:
     """Получить список дат в месяце, где есть записи."""
     conn = get_connection()
     cursor = conn.cursor()
+
+    # Первый и последний день месяца
+    if month == 12:
+        next_year = year + 1
+        next_month = 1
+    else:
+        next_year = year
+        next_month = month + 1
+
+    cursor.execute(
+        """SELECT DISTINCT entry_date
+           FROM food_entries
+           WHERE user_id = ?
+           AND entry_date >= ?
+           AND entry_date < ?
+           ORDER BY entry_date""",
+        (user_id, f"{year}-{month:02d}-01", f"{next_year}-{next_month:02d}-01")
+    )
+    results = cursor.fetchall()
+    conn.close()
+    return [row["entry_date"] for row in results]
+
+
+def get_week_stats(user_id: int, start_date: str, end_date: str) -> list:
+    """Получить статистику за период (неделю)."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """SELECT entry_date, 
+                  COALESCE(SUM(protein), 0) as total_protein,
+                  COALESCE(SUM(fat), 0) as total_fat
+           FROM food_entries
+           WHERE user_id = ? AND entry_date >= ? AND entry_date <= ?
+           GROUP BY entry_date
+           ORDER BY entry_date""",
+        (user_id, start_date, end_date)
+    )
+    results = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in results]
+
+
+def get_month_stats(user_id: int, year: int, month: int) -> list:
+    """Получить статистику за месяц."""
+    conn = get_connection()
+    cursor = conn.cursor()
     
     # Первый и последний день месяца
     if month == 12:
@@ -166,14 +212,15 @@ def get_dates_with_entries(user_id: int, year: int, month: int) -> list:
         next_month = month + 1
     
     cursor.execute(
-        """SELECT DISTINCT entry_date 
-           FROM food_entries 
-           WHERE user_id = ? 
-           AND entry_date >= ? 
-           AND entry_date < ?
+        """SELECT entry_date,
+                  COALESCE(SUM(protein), 0) as total_protein,
+                  COALESCE(SUM(fat), 0) as total_fat
+           FROM food_entries
+           WHERE user_id = ? AND entry_date >= ? AND entry_date < ?
+           GROUP BY entry_date
            ORDER BY entry_date""",
         (user_id, f"{year}-{month:02d}-01", f"{next_year}-{next_month:02d}-01")
     )
     results = cursor.fetchall()
     conn.close()
-    return [row["entry_date"] for row in results]
+    return [dict(row) for row in results]
