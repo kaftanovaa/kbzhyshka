@@ -140,21 +140,16 @@ async def show_today(callback: CallbackQuery):
     today = date.today().isoformat()
 
     protein, fat = get_daily_totals(user_id, today)
-    
-    # Определяем добор/недобор
+
+    # Определяем добор/недобор только по белкам
     protein_ok = protein >= PROTEIN_NORM
-    fat_ok = fat >= FAT_NORM
-    
-    if protein_ok and fat_ok:
+
+    if protein_ok:
         protein_percent = int((protein / PROTEIN_NORM) * 100) - 100
-        fat_percent = int((fat / FAT_NORM) * 100) - 100
-        max_percent = max(protein_percent, fat_percent)
-        status = f"✅ Добор: +{max_percent}%"
+        status = f"✅ Добор: +{protein_percent}%"
     else:
-        protein_percent = int((protein / PROTEIN_NORM) * 100) if protein < PROTEIN_NORM else 100
-        fat_percent = int((fat / FAT_NORM) * 100) if fat < FAT_NORM else 100
-        min_percent = min(protein_percent, fat_percent)
-        status = f"😞 Недобор: {min_percent}%"
+        protein_percent = int((protein / PROTEIN_NORM) * 100)
+        status = f"😞 Недобор: {protein_percent}%"
 
     text = (
         f"<b>📊 Данные за сегодня ({date.today().strftime('%d.%m.%Y')})</b>\n\n"
@@ -479,21 +474,16 @@ async def calendar_select_day(callback: CallbackQuery):
         date_title = "сегодня"
     else:
         date_title = f"{day:02d}.{month:02d}.{year}"
-    
-    # Определяем добор/недобор
+
+    # Определяем добор/недобор только по белкам
     protein_ok = protein >= PROTEIN_NORM
-    fat_ok = fat >= FAT_NORM
-    
-    if protein_ok and fat_ok:
+
+    if protein_ok:
         protein_percent = int((protein / PROTEIN_NORM) * 100) - 100
-        fat_percent = int((fat / FAT_NORM) * 100) - 100
-        max_percent = max(protein_percent, fat_percent)
-        status = f"✅ Добор: +{max_percent}%"
+        status = f"✅ Добор: +{protein_percent}%"
     else:
-        protein_percent = int((protein / PROTEIN_NORM) * 100) if protein < PROTEIN_NORM else 100
-        fat_percent = int((fat / FAT_NORM) * 100) if fat < FAT_NORM else 100
-        min_percent = min(protein_percent, fat_percent)
-        status = f"😞 Недобор: {min_percent}%"
+        protein_percent = int((protein / PROTEIN_NORM) * 100)
+        status = f"😞 Недобор: {protein_percent}%"
 
     text = (
         f"<b>📊 Данные за {date_title}</b>\n\n"
@@ -520,21 +510,16 @@ async def day_prev(callback: CallbackQuery):
     target_date = prev_date.isoformat()
 
     protein, fat = get_daily_totals(user_id, target_date)
-    
-    # Определяем добор/недобор
+
+    # Определяем добор/недобор только по белкам
     protein_ok = protein >= PROTEIN_NORM
-    fat_ok = fat >= FAT_NORM
-    
-    if protein_ok and fat_ok:
+
+    if protein_ok:
         protein_percent = int((protein / PROTEIN_NORM) * 100) - 100
-        fat_percent = int((fat / FAT_NORM) * 100) - 100
-        max_percent = max(protein_percent, fat_percent)
-        status = f"✅ Добор: +{max_percent}%"
+        status = f"✅ Добор: +{protein_percent}%"
     else:
-        protein_percent = int((protein / PROTEIN_NORM) * 100) if protein < PROTEIN_NORM else 100
-        fat_percent = int((fat / FAT_NORM) * 100) if fat < FAT_NORM else 100
-        min_percent = min(protein_percent, fat_percent)
-        status = f"😞 Недобор: {min_percent}%"
+        protein_percent = int((protein / PROTEIN_NORM) * 100)
+        status = f"😞 Недобор: {protein_percent}%"
 
     text = (
         f"<b>📊 Данные за {prev_date.strftime('%d.%m.%Y')}</b>\n\n"
@@ -559,21 +544,16 @@ async def day_next(callback: CallbackQuery):
     target_date = next_date.isoformat()
 
     protein, fat = get_daily_totals(user_id, target_date)
-    
-    # Определяем добор/недобор
+
+    # Определяем добор/недобор только по белкам
     protein_ok = protein >= PROTEIN_NORM
-    fat_ok = fat >= FAT_NORM
-    
-    if protein_ok and fat_ok:
+
+    if protein_ok:
         protein_percent = int((protein / PROTEIN_NORM) * 100) - 100
-        fat_percent = int((fat / FAT_NORM) * 100) - 100
-        max_percent = max(protein_percent, fat_percent)
-        status = f"✅ Добор: +{max_percent}%"
+        status = f"✅ Добор: +{protein_percent}%"
     else:
-        protein_percent = int((protein / PROTEIN_NORM) * 100) if protein < PROTEIN_NORM else 100
-        fat_percent = int((fat / FAT_NORM) * 100) if fat < FAT_NORM else 100
-        min_percent = min(protein_percent, fat_percent)
-        status = f"😞 Недобор: {min_percent}%"
+        protein_percent = int((protein / PROTEIN_NORM) * 100)
+        status = f"😞 Недобор: {protein_percent}%"
 
     text = (
         f"<b>📊 Данные за {next_date.strftime('%d.%m.%Y')}</b>\n\n"
@@ -698,50 +678,39 @@ async def show_week_stats(callback: CallbackQuery):
         fat = data["fat"]
         total_protein += protein
         total_fat += fat
-        
-        # Определяем добор/недобор за день
+
+        # Определяем добор/недобор за день только по белкам
         protein_ok = protein >= PROTEIN_NORM
-        fat_ok = fat >= FAT_NORM
-        
-        if protein_ok and fat_ok:
-            # Считаем процент превышения от минимальной нормы
+
+        if protein_ok:
             protein_percent = int((protein / PROTEIN_NORM) * 100) - 100
-            fat_percent = int((fat / FAT_NORM) * 100) - 100
-            max_percent = max(protein_percent, fat_percent)
             lines.append(f"<b>{date_formatted} ({day_name})</b>")
             lines.append(f"  Белки: {format_number(protein)}г | Жиры: {format_number(fat)}г")
-            lines.append(f"  ✅ Добор: +{max_percent}% ✅")
+            lines.append(f"  ✅ Добор: +{protein_percent}% ✅")
         else:
-            # Считаем процент недобора
-            protein_percent = int((protein / PROTEIN_NORM) * 100) if protein < PROTEIN_NORM else 100
-            fat_percent = int((fat / FAT_NORM) * 100) if fat < FAT_NORM else 100
-            min_percent = min(protein_percent, fat_percent)
+            protein_percent = int((protein / PROTEIN_NORM) * 100)
             lines.append(f"<b>{date_formatted} ({day_name})</b>")
             lines.append(f"  Белки: {format_number(protein)}г | Жиры: {format_number(fat)}г")
-            lines.append(f"  😞 Недобор: {min_percent}% 😞")
-        
+            lines.append(f"  😞 Недобор: {protein_percent}% 😞")
+
         lines.append("")  # Пустая строка между днями
-    
+
     # Итог
     lines.append("━━━━━━━━━━━━━━━━━━━━")
     lines.append(f"<b>📊 ИТОГО ЗА НЕДЕЛЮ</b>")
     lines.append(f"  Белки: {format_number(total_protein)}г / Жиры: {format_number(total_fat)}г")
     lines.append("")
-    
+
+    # Определяем добор/недобор за неделю только по белкам
     week_protein_ok = total_protein >= WEEKLY_PROTEIN_NORM
-    week_fat_ok = total_fat >= WEEKLY_FAT_NORM
-    
-    if week_protein_ok and week_fat_ok:
+
+    if week_protein_ok:
         protein_percent = int((total_protein / WEEKLY_PROTEIN_NORM) * 100) - 100
-        fat_percent = int((total_fat / WEEKLY_FAT_NORM) * 100) - 100
-        max_percent = max(protein_percent, fat_percent)
-        lines.append(f"✅ <b>Добор: +{max_percent}%</b> ✅")
+        lines.append(f"✅ <b>Добор: +{protein_percent}%</b> ✅")
     else:
         protein_percent = int((total_protein / WEEKLY_PROTEIN_NORM) * 100)
-        fat_percent = int((total_fat / WEEKLY_FAT_NORM) * 100)
-        min_percent = min(protein_percent, fat_percent)
-        lines.append(f"😞 <b>Недобор: {min_percent}%</b> 😞")
-    
+        lines.append(f"😞 <b>Недобор: {protein_percent}%</b> 😞")
+
     text = "\n".join(lines)
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -783,21 +752,16 @@ async def show_month_stats(callback: CallbackQuery):
     lines.append(f"<b>📊 ИТОГО ЗА {calendar.month_name[month].upper()} {year}</b>")
     lines.append(f"  Белки: {format_number(total_protein)}г | Жиры: {format_number(total_fat)}г")
     lines.append("")
-    
-    # Определяем добор/недобор за месяц (как за неделю)
-    month_protein_ok = total_protein >= WEEKLY_PROTEIN_NORM
-    month_fat_ok = total_fat >= WEEKLY_FAT_NORM
 
-    if month_protein_ok and month_fat_ok:
+    # Определяем добор/недобор за месяц только по белкам
+    month_protein_ok = total_protein >= WEEKLY_PROTEIN_NORM
+
+    if month_protein_ok:
         protein_percent = int((total_protein / WEEKLY_PROTEIN_NORM) * 100) - 100
-        fat_percent = int((total_fat / WEEKLY_FAT_NORM) * 100) - 100
-        max_percent = max(protein_percent, fat_percent)
-        lines.append(f"✅ <b>Добор: +{max_percent}%</b> ✅")
+        lines.append(f"✅ <b>Добор: +{protein_percent}%</b> ✅")
     else:
         protein_percent = int((total_protein / WEEKLY_PROTEIN_NORM) * 100)
-        fat_percent = int((total_fat / WEEKLY_FAT_NORM) * 100)
-        min_percent = min(protein_percent, fat_percent)
-        lines.append(f"😞 <b>Недобор: {min_percent}%</b> 😞")
+        lines.append(f"😞 <b>Недобор: {protein_percent}%</b> 😞")
 
     text = "\n".join(lines)
 
