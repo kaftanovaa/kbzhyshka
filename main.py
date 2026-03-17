@@ -111,34 +111,33 @@ async def start_add_food(callback: CallbackQuery, state: FSMContext):
 async def process_add_food(message: Message, state: FSMContext):
     data = await state.get_data()
     target_date = data.get("target_date", date.today().isoformat())
-    
+    user_id = message.from_user.id
+
     result = parse_food_input(message.text)
     if result is None:
         await message.answer(
-            " Некорректный ввод, введите в формате <b>Белки/Жиры</b>\n"
+            "❌ Некорректный ввод, введите в формате <b>Белки/Жиры</b>\n"
             "Пример: 50/60 или 23,5/22,2",
             parse_mode="HTML"
         )
         return
-    
+
     protein, fat = result
-    user_id = message.from_user.id
-    
+
     add_food_entry(user_id, target_date, protein, fat)
-    
-    # Обновляем страницу "Сегодня"
+
+    # Обновляем данные
     total_protein, total_fat = get_daily_totals(user_id, target_date)
-    
+
     if target_date == date.today().isoformat():
         text = (
-            f"<b> Данные за сегодня ({date.today().strftime('%d.%m.%Y')})</b>\n\n"
+            f"<b>📊 Данные за сегодня ({date.today().strftime('%d.%m.%Y')})</b>\n\n"
             f"Белки: <b>{format_number(total_protein)}</b>г\n"
             f"Жиры: <b>{format_number(total_fat)}</b>г\n\n"
             f"✅ Добавлено: {format_number(protein)}г белка / {format_number(fat)}г жира"
         )
-        await message.answer(text, reply_markup=get_today_keyboard(), parse_mode="HTML")
+        keyboard = get_today_keyboard()
     else:
-        # Если добавляли в другой день через календарь
         year, month, day = map(int, target_date.split('-'))
         text = (
             f"<b>📊 Данные за {day:02d}.{month:02d}.{year}</b>\n\n"
@@ -146,8 +145,19 @@ async def process_add_food(message: Message, state: FSMContext):
             f"Жиры: <b>{format_number(total_fat)}</b>г\n\n"
             f"✅ Добавлено: {format_number(protein)}г белка / {format_number(fat)}г жира"
         )
-        await message.answer(text, reply_markup=get_day_view_keyboard(year, month, day), parse_mode="HTML")
-    
+        keyboard = get_day_view_keyboard(year, month, day)
+
+    # Редактируем последнее сообщение с данными (если есть)
+    try:
+        # Ищем последнее сообщение бота с данными
+        async for msg in message.bot.get_chat_history(message.chat.id, limit=5):
+            if msg.from_user.id == bot.id and msg.reply_markup:
+                await msg.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
+                break
+    except:
+        # Если не получилось отредактировать — отправляем новое
+        await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
+
     await state.clear()
 
 
@@ -178,7 +188,7 @@ async def start_remove_food(callback: CallbackQuery, state: FSMContext):
 async def process_remove_food(message: Message, state: FSMContext):
     data = await state.get_data()
     target_date = data.get("target_date", date.today().isoformat())
-    
+
     result = parse_food_input(message.text)
     if result is None:
         await message.answer(
@@ -187,23 +197,23 @@ async def process_remove_food(message: Message, state: FSMContext):
             parse_mode="HTML"
         )
         return
-    
+
     protein, fat = result
     user_id = message.from_user.id
-    
+
     removed = remove_food_entry(user_id, target_date, protein, fat)
-    
+
     if not removed:
         await message.answer(
-            " Запись с такими значениями не найдена.\n"
-            "Проверьте введённые данные или выберите запись из списка.",
+            "❌ Запись с такими значениями не найдена.\n"
+            "Проверьте введённые данные.",
             parse_mode="HTML"
         )
         return
-    
-    # Обновляем страницу "Сегодня"
+
+    # Обновляем данные
     total_protein, total_fat = get_daily_totals(user_id, target_date)
-    
+
     if target_date == date.today().isoformat():
         text = (
             f"<b>📊 Данные за сегодня ({date.today().strftime('%d.%m.%Y')})</b>\n\n"
@@ -211,7 +221,7 @@ async def process_remove_food(message: Message, state: FSMContext):
             f"Жиры: <b>{format_number(total_fat)}</b>г\n\n"
             f"✅ Удалено: {format_number(protein)}г белка / {format_number(fat)}г жира"
         )
-        await message.answer(text, reply_markup=get_today_keyboard(), parse_mode="HTML")
+        keyboard = get_today_keyboard()
     else:
         year, month, day = map(int, target_date.split('-'))
         text = (
@@ -220,8 +230,17 @@ async def process_remove_food(message: Message, state: FSMContext):
             f"Жиры: <b>{format_number(total_fat)}</b>г\n\n"
             f"✅ Удалено: {format_number(protein)}г белка / {format_number(fat)}г жира"
         )
-        await message.answer(text, reply_markup=get_day_view_keyboard(year, month, day), parse_mode="HTML")
-    
+        keyboard = get_day_view_keyboard(year, month, day)
+
+    # Редактируем последнее сообщение с данными (если есть)
+    try:
+        async for msg in message.bot.get_chat_history(message.chat.id, limit=5):
+            if msg.from_user.id == bot.id and msg.reply_markup:
+                await msg.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
+                break
+    except:
+        await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
+
     await state.clear()
 
 
