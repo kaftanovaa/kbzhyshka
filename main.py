@@ -141,11 +141,27 @@ async def show_today(callback: CallbackQuery):
     today = date.today().isoformat()
 
     protein, fat = get_daily_totals(user_id, today)
+    
+    # Определяем добор/недобор
+    protein_ok = protein >= PROTEIN_NORM
+    fat_ok = fat >= FAT_NORM
+    
+    if protein_ok and fat_ok:
+        protein_percent = int((protein / PROTEIN_NORM) * 100) - 100
+        fat_percent = int((fat / FAT_NORM) * 100) - 100
+        max_percent = max(protein_percent, fat_percent)
+        status = f"✅ Добор: +{max_percent}%"
+    else:
+        protein_percent = int((protein / PROTEIN_NORM) * 100) if protein < PROTEIN_NORM else 100
+        fat_percent = int((fat / FAT_NORM) * 100) if fat < FAT_NORM else 100
+        min_percent = min(protein_percent, fat_percent)
+        status = f"😞 Недобор: {min_percent}%"
 
     text = (
         f"<b>📊 Данные за сегодня ({date.today().strftime('%d.%m.%Y')})</b>\n\n"
         f"Белки: <b>{format_number(protein)}</b>г\n"
-        f"Жиры: <b>{format_number(fat)}</b>г"
+        f"Жиры: <b>{format_number(fat)}</b>г\n\n"
+        f"{status}"
     )
 
     await callback.message.edit_text(
@@ -464,11 +480,27 @@ async def calendar_select_day(callback: CallbackQuery):
         date_title = "сегодня"
     else:
         date_title = f"{day:02d}.{month:02d}.{year}"
+    
+    # Определяем добор/недобор
+    protein_ok = protein >= PROTEIN_NORM
+    fat_ok = fat >= FAT_NORM
+    
+    if protein_ok and fat_ok:
+        protein_percent = int((protein / PROTEIN_NORM) * 100) - 100
+        fat_percent = int((fat / FAT_NORM) * 100) - 100
+        max_percent = max(protein_percent, fat_percent)
+        status = f"✅ Добор: +{max_percent}%"
+    else:
+        protein_percent = int((protein / PROTEIN_NORM) * 100) if protein < PROTEIN_NORM else 100
+        fat_percent = int((fat / FAT_NORM) * 100) if fat < FAT_NORM else 100
+        min_percent = min(protein_percent, fat_percent)
+        status = f"😞 Недобор: {min_percent}%"
 
     text = (
         f"<b>📊 Данные за {date_title}</b>\n\n"
         f"Белки: <b>{format_number(protein)}</b>г\n"
-        f"Жиры: <b>{format_number(fat)}</b>г"
+        f"Жиры: <b>{format_number(fat)}</b>г\n\n"
+        f"{status}"
     )
 
     keyboard = get_day_view_keyboard(year, month, day)
@@ -481,21 +513,37 @@ async def calendar_select_day(callback: CallbackQuery):
 async def day_prev(callback: CallbackQuery):
     _, year, month, day = callback.data.split(":")
     year, month, day = int(year), int(month), int(day)
-    
+
     current_date = date(year, month, day)
     prev_date = current_date - timedelta(days=1)
-    
+
     user_id = callback.from_user.id
     target_date = prev_date.isoformat()
-    
+
     protein, fat = get_daily_totals(user_id, target_date)
     
+    # Определяем добор/недобор
+    protein_ok = protein >= PROTEIN_NORM
+    fat_ok = fat >= FAT_NORM
+    
+    if protein_ok and fat_ok:
+        protein_percent = int((protein / PROTEIN_NORM) * 100) - 100
+        fat_percent = int((fat / FAT_NORM) * 100) - 100
+        max_percent = max(protein_percent, fat_percent)
+        status = f"✅ Добор: +{max_percent}%"
+    else:
+        protein_percent = int((protein / PROTEIN_NORM) * 100) if protein < PROTEIN_NORM else 100
+        fat_percent = int((fat / FAT_NORM) * 100) if fat < FAT_NORM else 100
+        min_percent = min(protein_percent, fat_percent)
+        status = f"😞 Недобор: {min_percent}%"
+
     text = (
         f"<b>📊 Данные за {prev_date.strftime('%d.%m.%Y')}</b>\n\n"
         f"Белки: <b>{format_number(protein)}</b>г\n"
-        f"Жиры: <b>{format_number(fat)}</b>г"
+        f"Жиры: <b>{format_number(fat)}</b>г\n\n"
+        f"{status}"
     )
-    
+
     keyboard = get_day_view_keyboard(prev_date.year, prev_date.month, prev_date.day)
     await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
 
@@ -504,21 +552,37 @@ async def day_prev(callback: CallbackQuery):
 async def day_next(callback: CallbackQuery):
     _, year, month, day = callback.data.split(":")
     year, month, day = int(year), int(month), int(day)
-    
+
     current_date = date(year, month, day)
     next_date = current_date + timedelta(days=1)
-    
+
     user_id = callback.from_user.id
     target_date = next_date.isoformat()
-    
+
     protein, fat = get_daily_totals(user_id, target_date)
     
+    # Определяем добор/недобор
+    protein_ok = protein >= PROTEIN_NORM
+    fat_ok = fat >= FAT_NORM
+    
+    if protein_ok and fat_ok:
+        protein_percent = int((protein / PROTEIN_NORM) * 100) - 100
+        fat_percent = int((fat / FAT_NORM) * 100) - 100
+        max_percent = max(protein_percent, fat_percent)
+        status = f"✅ Добор: +{max_percent}%"
+    else:
+        protein_percent = int((protein / PROTEIN_NORM) * 100) if protein < PROTEIN_NORM else 100
+        fat_percent = int((fat / FAT_NORM) * 100) if fat < FAT_NORM else 100
+        min_percent = min(protein_percent, fat_percent)
+        status = f"😞 Недобор: {min_percent}%"
+
     text = (
         f"<b>📊 Данные за {next_date.strftime('%d.%m.%Y')}</b>\n\n"
         f"Белки: <b>{format_number(protein)}</b>г\n"
-        f"Жиры: <b>{format_number(fat)}</b>г"
+        f"Жиры: <b>{format_number(fat)}</b>г\n\n"
+        f"{status}"
     )
-    
+
     keyboard = get_day_view_keyboard(next_date.year, next_date.month, next_date.day)
     await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
 
@@ -694,9 +758,9 @@ async def show_week_stats(callback: CallbackQuery):
 async def show_month_stats(callback: CallbackQuery):
     user_id = callback.from_user.id
     year, month = get_month_range()
-    
+
     stats = get_month_stats(user_id, year, month)
-    
+
     if not stats:
         text = f"За {calendar.month_name[month]} {year} ещё нет записей"
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -704,49 +768,44 @@ async def show_month_stats(callback: CallbackQuery):
         ])
         await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
         return
-    
+
     # Формируем сообщение
-    lines = []
     total_protein = 0
     total_fat = 0
-    days_count = 0
-    
+
     for row in stats:
-        date_str = row["entry_date"]
         protein = float(row["total_protein"])
         fat = float(row["total_fat"])
-        day_name = get_day_name(date_str)
-        d = date.fromisoformat(date_str)
-        date_formatted = d.strftime("%d.%m.%Y")
-        
         total_protein += protein
         total_fat += fat
-        days_count += 1
-        
-        lines.append(f"<b>{date_formatted} ({day_name})</b>")
-        lines.append(f"  Белки: {format_number(protein)}г | Жиры: {format_number(fat)}г")
-        lines.append("")
-    
-    # Итог
-    lines.append("━━━━━━━━━━━━━━━━━━━━")
+
+    # Итог как в статистике за неделю
+    lines = []
     lines.append(f"<b>📊 ИТОГО ЗА {calendar.month_name[month].upper()} {year}</b>")
-    lines.append(f"  Дней с записями: {days_count}")
     lines.append(f"  Белки: {format_number(total_protein)}г | Жиры: {format_number(total_fat)}г")
     lines.append("")
     
-    # Среднее за день
-    avg_protein = total_protein / days_count if days_count > 0 else 0
-    avg_fat = total_fat / days_count if days_count > 0 else 0
-    
-    lines.append(f"<b>Среднее за день:</b>")
-    lines.append(f"  Белки: {format_number(avg_protein)}г | Жиры: {format_number(avg_fat)}г")
-    
+    # Определяем добор/недобор за месяц (как за неделю)
+    month_protein_ok = total_protein >= WEEKLY_PROTEIN_NORM
+    month_fat_ok = total_fat >= WEEKLY_FAT_NORM
+
+    if month_protein_ok and month_fat_ok:
+        protein_percent = int((total_protein / WEEKLY_PROTEIN_NORM) * 100) - 100
+        fat_percent = int((total_fat / WEEKLY_FAT_NORM) * 100) - 100
+        max_percent = max(protein_percent, fat_percent)
+        lines.append(f"✅ <b>Добор: +{max_percent}%</b> ✅")
+    else:
+        protein_percent = int((total_protein / WEEKLY_PROTEIN_NORM) * 100)
+        fat_percent = int((total_fat / WEEKLY_FAT_NORM) * 100)
+        min_percent = min(protein_percent, fat_percent)
+        lines.append(f"😞 <b>Недобор: {min_percent}%</b> 😞")
+
     text = "\n".join(lines)
-    
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔙 На главную", callback_data="back_main")]
     ])
-    
+
     await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
 
 

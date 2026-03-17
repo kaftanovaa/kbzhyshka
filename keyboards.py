@@ -15,11 +15,19 @@ def get_main_keyboard() -> InlineKeyboardMarkup:
 
 
 def get_today_keyboard() -> InlineKeyboardMarkup:
-    """Клавиатура для страницы 'Сегодня'."""
+    """Клавиатура для страницы 'Сегодня' с навигацией."""
+    # Вычисляем предыдущий и следующий день
+    today = date.today()
+    prev_date = today - timedelta(days=1)
+    next_date = today + timedelta(days=1)
+    
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Добавить ням-ням", callback_data="add_food")],
         [InlineKeyboardButton(text="Удалить ням-ням", callback_data="remove_food")],
-        [InlineKeyboardButton(text="🔙 Назад", callback_data="back_main")]
+        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{prev_date.year}:{prev_date.month}:{prev_date.day}"),
+         InlineKeyboardButton(text="🔙 На главную", callback_data="back_main"),
+         InlineKeyboardButton(text="▶", callback_data=f"day_next:{next_date.year}:{next_date.month}:{next_date.day}")],
+        [InlineKeyboardButton(text="📅 К календарю", callback_data="calendar_main")]
     ])
     return keyboard
 
