@@ -1,22 +1,23 @@
-import sqlite3
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from datetime import date
 from typing import Optional
 
-DATABASE = "bj.db"
+# Подключение к PostgreSQL (Railway предоставляет DATABASE_URL)
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
 def get_connection():
     """Получить соединение с базой данных."""
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return psycopg2.connect(DATABASE_URL)
 
 
 def init_db():
     """Инициализировать базу данных."""
     conn = get_connection()
     cursor = conn.cursor()
-    
+
     # Таблица пользователей
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
@@ -25,11 +26,11 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    
+
     # Таблица записей БЖ за каждый день
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS records (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             user_id INTEGER,
             record_date DATE,
             protein REAL DEFAULT 0,
@@ -38,11 +39,11 @@ def init_db():
             UNIQUE(user_id, record_date)
         )
     """)
-    
+
     # Таблица отдельных записей "ням-ням" (для удаления/редактирования)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS food_entries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             user_id INTEGER,
             entry_date DATE,
             protein REAL,
@@ -50,7 +51,7 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    
+
     conn.commit()
     conn.close()
 
@@ -60,7 +61,7 @@ def add_user(user_id: int, username: Optional[str] = None):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT OR IGNORE INTO users (user_id, username) VALUES (?, ?)",
+        "INSERT INTO users (user_id, username) VALUES (%s, %s) ON CONFLICT (user_id) DO NOTHING",
         (user_id, username)
     )
     conn.commit()
@@ -71,7 +72,7 @@ def user_exists(user_id: int) -> bool:
     """Проверить, существует ли пользователь."""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT 1 FROM users WHERE user_id = ?", (user_id,))
+    cursor.execute("SELECT 1 FROM users WHERE user_id = %s", (user_id,))
     result = cursor.fetchone()
     conn.close()
     return result is not None
@@ -82,7 +83,7 @@ def add_food_entry(user_id: int, entry_date: str, protein: float, fat: float):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO food_entries (user_id, entry_date, protein, fat) VALUES (?, ?, ?, ?)",
+        "INSERT INTO food_entries (user_id, entry_date, protein, fat) VALUES (%s, %s, %s, %s)",
         (user_id, entry_date, protein, fat)
     )
     conn.commit()
@@ -96,8 +97,8 @@ def remove_food_entry(user_id: int, entry_date: str, protein: float, fat: float)
     # Удаляем одну запись с такими параметрами (с точностью до 0.1)
     cursor.execute(
         """DELETE FROM food_entries
-           WHERE user_id = ? AND entry_date = ? 
-           AND ABS(protein - ?) < 0.1 AND ABS(fat - ?) < 0.1
+           WHERE user_id = %s AND entry_date = %s
+           AND ABS(protein - %s) < 0.1 AND ABS(fat - %s) < 0.1
            LIMIT 1""",
         (user_id, entry_date, protein, fat)
     )
@@ -110,12 +111,12 @@ def remove_food_entry(user_id: int, entry_date: str, protein: float, fat: float)
 def get_daily_totals(user_id: int, record_date: str) -> tuple:
     """Получить суммарные БЖ за день."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute(
-        """SELECT COALESCE(SUM(protein), 0) as total_protein, 
-                  COALESCE(SUM(fat), 0) as total_fat 
-           FROM food_entries 
-           WHERE user_id = ? AND entry_date = ?""",
+        """SELECT COALESCE(SUM(protein), 0) as total_protein,
+                  COALESCE(SUM(fat), 0) as total_fat
+           FROM food_entries
+           WHERE user_id = %s AND entry_date = %s""",
         (user_id, record_date)
     )
     result = cursor.fetchone()
@@ -126,11 +127,11 @@ def get_daily_totals(user_id: int, record_date: str) -> tuple:
 def get_food_entries_for_date(user_id: int, record_date: str) -> list:
     """Получить все записи о еде за дату."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute(
-        """SELECT id, protein, fat, created_at 
-           FROM food_entries 
-           WHERE user_id = ? AND entry_date = ?
+        """SELECT id, protein, fat, created_at
+           FROM food_entries
+           WHERE user_id = %s AND entry_date = %s
            ORDER BY created_at DESC""",
         (user_id, record_date)
     )
@@ -144,7 +145,7 @@ def delete_food_entry_by_id(user_id: int, entry_id: int) -> bool:
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "DELETE FROM food_entries WHERE id = ? AND user_id = ?",
+        "DELETE FROM food_entries WHERE id = %s AND user_id = %s",
         (entry_id, user_id)
     )
     conn.commit()
@@ -156,7 +157,7 @@ def delete_food_entry_by_id(user_id: int, entry_id: int) -> bool:
 def get_dates_with_entries(user_id: int, year: int, month: int) -> list:
     """Получить список дат в месяце, где есть записи."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     # Первый и последний день месяца
     if month == 12:
@@ -169,9 +170,9 @@ def get_dates_with_entries(user_id: int, year: int, month: int) -> list:
     cursor.execute(
         """SELECT DISTINCT entry_date
            FROM food_entries
-           WHERE user_id = ?
-           AND entry_date >= ?
-           AND entry_date < ?
+           WHERE user_id = %s
+           AND entry_date >= %s
+           AND entry_date < %s
            ORDER BY entry_date""",
         (user_id, f"{year}-{month:02d}-01", f"{next_year}-{next_month:02d}-01")
     )
@@ -183,13 +184,13 @@ def get_dates_with_entries(user_id: int, year: int, month: int) -> list:
 def get_week_stats(user_id: int, start_date: str, end_date: str) -> list:
     """Получить статистику за период (неделю)."""
     conn = get_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute(
-        """SELECT entry_date, 
+        """SELECT entry_date,
                   COALESCE(SUM(protein), 0) as total_protein,
                   COALESCE(SUM(fat), 0) as total_fat
            FROM food_entries
-           WHERE user_id = ? AND entry_date >= ? AND entry_date <= ?
+           WHERE user_id = %s AND entry_date >= %s AND entry_date <= %s
            GROUP BY entry_date
            ORDER BY entry_date""",
         (user_id, start_date, end_date)
@@ -202,8 +203,8 @@ def get_week_stats(user_id: int, start_date: str, end_date: str) -> list:
 def get_month_stats(user_id: int, year: int, month: int) -> list:
     """Получить статистику за месяц."""
     conn = get_connection()
-    cursor = conn.cursor()
-    
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+
     # Первый и последний день месяца
     if month == 12:
         next_year = year + 1
@@ -211,13 +212,13 @@ def get_month_stats(user_id: int, year: int, month: int) -> list:
     else:
         next_year = year
         next_month = month + 1
-    
+
     cursor.execute(
         """SELECT entry_date,
                   COALESCE(SUM(protein), 0) as total_protein,
                   COALESCE(SUM(fat), 0) as total_fat
            FROM food_entries
-           WHERE user_id = ? AND entry_date >= ? AND entry_date < ?
+           WHERE user_id = %s AND entry_date >= %s AND entry_date < %s
            GROUP BY entry_date
            ORDER BY entry_date""",
         (user_id, f"{year}-{month:02d}-01", f"{next_year}-{next_month:02d}-01")
