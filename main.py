@@ -127,8 +127,7 @@ async def cmd_start(message: Message):
         add_user(user_id, username)
 
     await message.answer(
-        "Привет! Я бот для подсчета чистого БЖ, без лишних данных о калориях и углеводах>3\n\n"
-        "Выбери действие:",
+        "🤫 Запиши, сколько белок ты скушал сегодня",
         reply_markup=get_main_keyboard()
     )
 
@@ -822,10 +821,8 @@ async def cancel_action(callback: CallbackQuery):
 @dp.callback_query(F.data == "back_main")
 async def back_to_main(callback: CallbackQuery):
     await callback.message.edit_text(
-        "Привет! Я бот для подсчета чистого БЖ, без лишних данных о калориях и углеводах>3\n\n"
-        "Выбери действие:",
-        reply_markup=get_main_keyboard(),
-        parse_mode="HTML"
+        "🤫 Запиши, сколько белок ты скушал сегодня",
+        reply_markup=get_main_keyboard()
     )
 
 
