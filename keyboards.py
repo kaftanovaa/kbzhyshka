@@ -16,17 +16,14 @@ def get_main_keyboard() -> InlineKeyboardMarkup:
 
 def get_today_keyboard() -> InlineKeyboardMarkup:
     """Клавиатура для страницы 'Сегодня' с навигацией."""
-    # Вычисляем предыдущий и следующий день
     today = date.today()
-    prev_date = today - timedelta(days=1)
-    next_date = today + timedelta(days=1)
-    
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Добавить ням-ням", callback_data="add_food")],
         [InlineKeyboardButton(text="Удалить ням-ням", callback_data="remove_food")],
-        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{prev_date.year}:{prev_date.month}:{prev_date.day}"),
+        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{today.year}:{today.month}:{today.day}"),
          InlineKeyboardButton(text="🔙 На главную", callback_data="back_main"),
-         InlineKeyboardButton(text="▶", callback_data=f"day_next:{next_date.year}:{next_date.month}:{next_date.day}")],
+         InlineKeyboardButton(text="▶", callback_data=f"day_next:{today.year}:{today.month}:{today.day}")],
         [InlineKeyboardButton(text="📅 К календарю", callback_data="calendar_main")]
     ])
     return keyboard
@@ -112,17 +109,14 @@ def get_calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
 
 def get_day_view_keyboard(year: int, month: int, day: int) -> InlineKeyboardMarkup:
     """Клавиатура для просмотра конкретного дня с навигацией."""
-    # Вычисляем предыдущий и следующий день
     current_date = date(year, month, day)
-    prev_date = current_date - timedelta(days=1)
-    next_date = current_date + timedelta(days=1)
-    
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Добавить ням-ням", callback_data=f"add_food_day:{year}:{month}:{day}")],
         [InlineKeyboardButton(text="Удалить ням-ням", callback_data=f"remove_food_day:{year}:{month}:{day}")],
-        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{prev_date.year}:{prev_date.month}:{prev_date.day}"),
+        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{year}:{month}:{day}"),
          InlineKeyboardButton(text="🔙 К календарю", callback_data=f"calendar_month:{year}:{month}"),
-         InlineKeyboardButton(text="▶", callback_data=f"day_next:{next_date.year}:{next_date.month}:{next_date.day}")],
+         InlineKeyboardButton(text="▶", callback_data=f"day_next:{year}:{month}:{day}")],
         [InlineKeyboardButton(text="🏠 На главную", callback_data="back_main")]
     ])
     return keyboard
@@ -130,21 +124,17 @@ def get_day_view_keyboard(year: int, month: int, day: int) -> InlineKeyboardMark
 
 def get_day_view_keyboard_with_add_type(year: int, month: int, day: int, per_100g: bool = False) -> InlineKeyboardMarkup:
     """Клавиатура для дня с выбором типа добавления."""
-    current_date = date(year, month, day)
-    prev_date = current_date - timedelta(days=1)
-    next_date = current_date + timedelta(days=1)
-    
     if per_100g:
         add_callback = f"add_100g_day:{year}:{month}:{day}"
     else:
         add_callback = f"add_serving_day:{year}:{month}:{day}"
-    
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🍽 На порцию", callback_data=f"add_serving_day:{year}:{month}:{day}")],
         [InlineKeyboardButton(text="⚖ На 100г", callback_data=f"add_100g_day:{year}:{month}:{day}")],
-        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{prev_date.year}:{prev_date.month}:{prev_date.day}"),
+        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{year}:{month}:{day}"),
          InlineKeyboardButton(text="🔙 К календарю", callback_data=f"calendar_month:{year}:{month}"),
-         InlineKeyboardButton(text="▶", callback_data=f"day_next:{next_date.year}:{next_date.month}:{next_date.day}")],
+         InlineKeyboardButton(text="▶", callback_data=f"day_next:{year}:{month}:{day}")],
         [InlineKeyboardButton(text="🏠 На главную", callback_data="back_main")]
     ])
     return keyboard
