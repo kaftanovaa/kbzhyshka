@@ -327,11 +327,12 @@ async def calendar_select_day(callback: CallbackQuery):
 @dp.callback_query(F.data.startswith("add_food_day:"))
 async def add_food_from_calendar(callback: CallbackQuery, state: FSMContext):
     _, year, month, day = callback.data.split(":")
+    year, month, day = int(year), int(month), int(day)
     target_date = f"{year}-{month:02d}-{day:02d}"
-    
+
     await state.update_data(target_date=target_date)
     await callback.message.answer(
-        f"Введите данные для <b>{day}.{month:02d}.{year}</b> в формате <b>Белки/Жиры</b>\n"
+        f"Введите данные для <b>{day:02d}.{month:02d}.{year}</b> в формате <b>Белки/Жиры</b>\n"
         "Пример: 50/60 или 23,5/22,2",
         parse_mode="HTML"
     )
@@ -342,18 +343,19 @@ async def add_food_from_calendar(callback: CallbackQuery, state: FSMContext):
 @dp.callback_query(F.data.startswith("remove_food_day:"))
 async def remove_food_from_calendar(callback: CallbackQuery, state: FSMContext):
     _, year, month, day = callback.data.split(":")
+    year, month, day = int(year), int(month), int(day)
     target_date = f"{year}-{month:02d}-{day:02d}"
-    
+
     user_id = callback.from_user.id
     entries = get_food_entries_for_date(user_id, target_date)
-    
+
     if not entries:
-        await callback.answer(f"За {day}.{month:02d}.{year} нет записей для удаления", show_alert=True)
+        await callback.answer(f"За {day:02d}.{month:02d}.{year} нет записей для удаления", show_alert=True)
         return
-    
+
     await state.update_data(target_date=target_date)
     await callback.message.answer(
-        f"Введите данные для удаления за <b>{day}.{month:02d}.{year}</b>\n"
+        f"Введите данные для удаления за <b>{day:02d}.{month:02d}.{year}</b>\n"
         "Формат: <b>Белки/Жиры</b> (пример: 50/60)",
         parse_mode="HTML"
     )
