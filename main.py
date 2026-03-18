@@ -366,12 +366,26 @@ async def process_remove_food(message: Message, state: FSMContext):
     protein, fat = result
     user_id = message.from_user.id
 
+    # Получаем список записей для отладки
+    entries = get_food_entries_for_date(user_id, target_date)
+    
+    if not entries:
+        await message.answer(
+            "❌ За сегодня нет записей для удаления.\n"
+            "Сначала добавь что-нибудь.",
+            parse_mode="HTML"
+        )
+        return
+
     removed = remove_food_entry(user_id, target_date, protein, fat)
 
     if not removed:
+        # Показываем какие записи есть в базе
+        entries_text = "\n".join([f"• {e['protein']}г белка / {e['fat']}г жира" for e in entries])
         await message.answer(
-            "❌ Запись с такими значениями не найдена.\n"
-            "Проверьте введённые данные.",
+            f"❌ Запись с такими значениями не найдена.\n\n"
+            f"Ты ввёл: <b>{protein}/{fat}</b>\n\n"
+            f"Есть записи:\n{entries_text}",
             parse_mode="HTML"
         )
         return
