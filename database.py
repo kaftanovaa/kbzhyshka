@@ -99,15 +99,29 @@ def remove_food_entry(user_id: int, entry_date: str, protein: float, fat: float)
     """Удалить запись о еде (одну конкретную запись с такими значениями)."""
     conn = get_connection()
     cursor = conn.cursor()
-    # Удаляем последнюю запись с такими параметрами (с точностью до 0.5)
+    
+    # Сначала получаем все записи за эту дату
     cursor.execute(
-        """DELETE FROM food_entries
+        """SELECT id, protein, fat FROM food_entries
            WHERE user_id = %s AND entry_date = %s
-           AND ABS(protein - %s) < 0.5 AND ABS(fat - %s) < 0.5
-           ORDER BY created_at DESC
-           LIMIT 1""",
-        (user_id, entry_date, protein, fat)
+           ORDER BY created_at DESC""",
+        (user_id, entry_date)
     )
+    entries = cursor.fetchall()
+    
+    # Ищем подходящую запись (с точностью до 0.5)
+    entry_to_delete = None
+    for entry in entries:
+        if abs(entry[1] - protein) < 0.5 and abs(entry[2] - fat) < 0.5:
+            entry_to_delete = entry[0]  # id записи
+            break
+    
+    if entry_to_delete is None:
+        conn.close()
+        return False
+    
+    # Удаляем найденную запись по ID
+    cursor.execute("DELETE FROM food_entries WHERE id = %s", (entry_to_delete,))
     conn.commit()
     affected = cursor.rowcount
     conn.close()
