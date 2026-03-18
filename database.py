@@ -7,6 +7,10 @@ from typing import Optional
 # Подключение к PostgreSQL (Railway предоставляет DATABASE_URL)
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
+# Проверка наличия DATABASE_URL
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL не найден! Добавь переменную окружения на Railway")
+
 
 def get_connection():
     """Получить соединение с базой данных."""
