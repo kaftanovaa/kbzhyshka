@@ -96,36 +96,18 @@ def add_food_entry(user_id: int, entry_date: str, protein: float, fat: float):
 
 
 def remove_food_entry(user_id: int, entry_date: str, protein: float, fat: float):
-    """Удалить запись о еде (одну конкретную запись с такими значениями)."""
+    """Вычесть значения из суммы за день (добавить отрицательную запись)."""
     conn = get_connection()
     cursor = conn.cursor()
-    
-    # Сначала получаем все записи за эту дату
+    # Просто добавляем запись с отрицательными значениями - она вычтется из суммы
     cursor.execute(
-        """SELECT id, protein, fat FROM food_entries
-           WHERE user_id = %s AND entry_date = %s
-           ORDER BY created_at DESC""",
-        (user_id, entry_date)
+        """INSERT INTO food_entries (user_id, entry_date, protein, fat)
+           VALUES (%s, %s, %s, %s)""",
+        (user_id, entry_date, -protein, -fat)
     )
-    entries = cursor.fetchall()
-    
-    # Ищем подходящую запись (с точностью до 0.5)
-    entry_to_delete = None
-    for entry in entries:
-        if abs(entry[1] - protein) < 0.5 and abs(entry[2] - fat) < 0.5:
-            entry_to_delete = entry[0]  # id записи
-            break
-    
-    if entry_to_delete is None:
-        conn.close()
-        return False
-    
-    # Удаляем найденную запись по ID
-    cursor.execute("DELETE FROM food_entries WHERE id = %s", (entry_to_delete,))
     conn.commit()
-    affected = cursor.rowcount
     conn.close()
-    return affected > 0
+    return True
 
 
 def get_daily_totals(user_id: int, record_date: str) -> tuple:
