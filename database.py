@@ -10,7 +10,8 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def get_connection():
     """Получить соединение с базой данных."""
-    return psycopg2.connect(DATABASE_URL)
+    # Добавляем SSL режим для Railway
+    return psycopg2.connect(DATABASE_URL, sslmode="require")
 
 
 def init_db():
