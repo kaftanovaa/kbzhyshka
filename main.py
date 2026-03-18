@@ -198,7 +198,7 @@ async def start_add_serving(callback: CallbackQuery, state: FSMContext):
     await state.set_state(FoodInput.waiting_for_serving)
 
 
-@dp.message(FoodInput.waiting_for_serving)
+@dp.message(F.text, FoodInput.waiting_for_serving)
 async def process_add_serving(message: Message, state: FSMContext):
     if message.text == "❌ Отмена":
         await state.clear()
@@ -264,7 +264,7 @@ async def start_add_100g(callback: CallbackQuery, state: FSMContext):
     await state.set_state(FoodInput.waiting_for_100g)
 
 
-@dp.message(FoodInput.waiting_for_100g)
+@dp.message(F.text, FoodInput.waiting_for_100g)
 async def process_add_100g(message: Message, state: FSMContext):
     if message.text == "❌ Отмена":
         await state.clear()
@@ -346,12 +346,12 @@ async def start_remove_food(callback: CallbackQuery, state: FSMContext):
     await state.set_state(FoodInput.waiting_for_remove)
 
 
-@dp.message(FoodInput.waiting_for_remove)
+@dp.message(F.text, FoodInput.waiting_for_remove)
 async def process_remove_food(message: Message, state: FSMContext):
     if message.text == "❌ Отмена":
         await state.clear()
         return
-    
+
     data = await state.get_data()
     target_date = data.get("target_date", date.today().isoformat())
 
