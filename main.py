@@ -775,7 +775,8 @@ async def show_month_stats(callback: CallbackQuery):
 # ================== ОТМЕНА ==================
 
 @dp.callback_query(F.data == "cancel_action")
-async def cancel_action(callback: CallbackQuery):
+async def cancel_action(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
     await callback.message.delete()
     await callback.answer("Отменено")
 
