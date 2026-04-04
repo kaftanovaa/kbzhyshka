@@ -159,8 +159,7 @@ def calculate_norms(gender, weight, height, age, activity_coeff, activity_label,
 def get_day_status(current: float, norm: float) -> str:
     if norm == 0:
         return ""
-    percent = int((current / norm) * 100)
-    return f"{percent}%"
+    return str(int((current / norm) * 100))
 
 
 # ================== ТЕКСТОВЫЕ ОБРАБОТЧИКИ (ReplyKeyboard) ==================
@@ -194,10 +193,10 @@ async def show_day_view(message: Message, target_date: date, state: FSMContext, 
     else:
         lines = [
             f"<b>📊 Данные за {date_title}</b>", "",
-            f"🔥 Калории: {format_number(cal)}/{format_number(settings['daily_calories'])} ккал — {get_day_status(cal, settings['daily_calories'])}%",
-            f"🥩 Белки: {format_number(prot)}/{format_number(settings['protein_norm'])}г — {get_day_status(prot, settings['protein_norm'])}%",
-            f"🥑 Жиры: {format_number(fat)}/{format_number(settings['fat_norm'])}г — {get_day_status(fat, settings['fat_norm'])}%",
-            f"🍞 Углеводы: {format_number(carb)}/{format_number(settings['carbs_norm'])}г — {get_day_status(carb, settings['carbs_norm'])}%"
+            f"🔥 Калории: {format_number(cal)}/{format_number(settings['daily_calories'])} ккал — {get_day_status(cal, settings['daily_calories'])}",
+            f"🥩 Белки: {format_number(prot)}/{format_number(settings['protein_norm'])}г — {get_day_status(prot, settings['protein_norm'])}",
+            f"🥑 Жиры: {format_number(fat)}/{format_number(settings['fat_norm'])}г — {get_day_status(fat, settings['fat_norm'])}",
+            f"🍞 Углеводы: {format_number(carb)}/{format_number(settings['carbs_norm'])}г — {get_day_status(carb, settings['carbs_norm'])}"
         ]
 
     text = "\n".join(lines)
@@ -215,7 +214,7 @@ async def handle_main_button(message: Message, state: FSMContext):
     if text == "📅 Сегодня":
         await show_day_view(message, date.today(), state, is_today_view=True)
 
-    elif text == " Главная":
+    elif text == "🏠 Главная":
         await state.clear()
         settings = get_user_settings(user_id)
         await message.answer("🤫 Запиши, сколько КБЖУ ты скушал сегодня",
@@ -305,7 +304,7 @@ async def show_week_stats_text(message: Message, user_id: int):
         if settings:
             cal_p = int((cal / settings["daily_calories"]) * 100) if settings["daily_calories"] > 0 else 0
             prot_p = int((prot / settings["protein_norm"]) * 100) if settings["protein_norm"] > 0 else 0
-            lines.append(f"  ккал {cal_p}% | белок {prot_p}%")
+            lines.append(f"  ккал {cal_p} | белок {prot_p}")
 
         lines.append("")
 
@@ -326,7 +325,7 @@ async def show_week_stats_text(message: Message, user_id: int):
         lines.append("")
         cal_p = int((total_cal / norm_cal) * 100) if norm_cal > 0 else 0
         prot_p = int((total_prot / norm_prot) * 100) if norm_prot > 0 else 0
-        lines.append(f"<b>Общий итог: ккал {cal_p}% | белок {prot_p}%</b>")
+        lines.append(f"<b>Общий итог: ккал {cal_p} | белок {prot_p}</b>")
     else:
         lines.append(f"  🔥 {format_number(total_cal)} ккал")
         lines.append(f"  🥩 {format_number(total_prot)}г | 🥑 {format_number(total_fat)}г | 🍞 {format_number(total_carb)}г")
@@ -369,7 +368,7 @@ async def show_month_stats_text(message: Message, user_id: int):
         prot_p = int((total_prot / norm_prot) * 100) if norm_prot > 0 else 0
         fat_p = int((total_fat / norm_fat) * 100) if norm_fat > 0 else 0
         carb_p = int((total_carb / norm_carb) * 100) if norm_carb > 0 else 0
-        lines.append(f"<b>Общий итог: ккал {cal_p}% | белок {prot_p}% | жир {fat_p}% | углеводы {carb_p}%</b>")
+        lines.append(f"<b>Общий итог: ккал {cal_p} | белок {prot_p} | жир {fat_p} | углеводы {carb_p}</b>")
     else:
         lines.append(f"  🔥 {format_number(total_cal)} ккал")
         lines.append(f"  🥩 {format_number(total_prot)}г | 🥑 {format_number(total_fat)}г | 🍞 {format_number(total_carb)}г")
@@ -811,10 +810,10 @@ async def calendar_select_day(callback: CallbackQuery):
                  f"🍞 Углеводы: <b>{format_number(carb)}</b>г"]
     else:
         lines = [f"<b>📊 Данные за {date_title}</b>", "",
-                 f"🔥 Калории: {format_number(cal)}/{format_number(settings['daily_calories'])} ккал — {get_day_status(cal, settings['daily_calories'])}%",
-                 f"🥩 Белки: {format_number(prot)}/{format_number(settings['protein_norm'])}г — {get_day_status(prot, settings['protein_norm'])}%",
-                 f"🥑 Жиры: {format_number(fat)}/{format_number(settings['fat_norm'])}г — {get_day_status(fat, settings['fat_norm'])}%",
-                 f"🍞 Углеводы: {format_number(carb)}/{format_number(settings['carbs_norm'])}г — {get_day_status(carb, settings['carbs_norm'])}%"]
+                 f"🔥 Калории: {format_number(cal)}/{format_number(settings['daily_calories'])} ккал — {get_day_status(cal, settings['daily_calories'])}",
+                 f"🥩 Белки: {format_number(prot)}/{format_number(settings['protein_norm'])}г — {get_day_status(prot, settings['protein_norm'])}",
+                 f"🥑 Жиры: {format_number(fat)}/{format_number(settings['fat_norm'])}г — {get_day_status(fat, settings['fat_norm'])}",
+                 f"🍞 Углеводы: {format_number(carb)}/{format_number(settings['carbs_norm'])}г — {get_day_status(carb, settings['carbs_norm'])}"]
 
     await callback.message.answer("\n".join(lines), reply_markup=get_day_keyboard(), parse_mode="HTML")
 
