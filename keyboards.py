@@ -1,84 +1,108 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from datetime import date, timedelta
 import calendar
 
 
-def get_main_keyboard(has_settings: bool = True) -> InlineKeyboardMarkup:
-    """Главное меню."""
-    rows = [
-        [InlineKeyboardButton(text="📅 Сегодня", callback_data="today")],
-        [InlineKeyboardButton(text="📆 Открыть календарь", callback_data="calendar_main")],
-        [InlineKeyboardButton(text="📊 Статистика за неделю", callback_data="stats_week")],
-        [InlineKeyboardButton(text="📈 Статистика за месяц", callback_data="stats_month")]
+# ===== REPLY KEYBOARDS (внизу экрана) =====
+
+def get_main_keyboard(has_settings: bool = True) -> ReplyKeyboardMarkup:
+    """Главное меню — ReplyKeyboard."""
+    buttons = [
+        [KeyboardButton(text="📅 Сегодня")],
+        [KeyboardButton(text="📆 Открыть календарь")],
+        [KeyboardButton(text="📊 Статистика за неделю")],
+        [KeyboardButton(text="📈 Статистика за месяц")]
     ]
     if has_settings:
-        rows.append([InlineKeyboardButton(text="🔄 Пересчитать норму", callback_data="recalc_norm")])
-    return InlineKeyboardMarkup(inline_keyboard=rows)
+        buttons.append([KeyboardButton(text="🔄 Пересчитать норму")])
+    return ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True)
 
 
-def get_gender_keyboard() -> InlineKeyboardMarkup:
+def get_today_keyboard() -> ReplyKeyboardMarkup:
+    """Клавиатура для страницы 'Сегодня' — ReplyKeyboard."""
+    return ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="➕ Добавить"), KeyboardButton(text="➖ Удалить")],
+        [KeyboardButton(text="◀ Вчера"), KeyboardButton(text="▶ Завтра")],
+        [KeyboardButton(text="📆 К календарю"), KeyboardButton(text="🏠 Главная")]
+    ], resize_keyboard=True)
+
+
+def get_day_keyboard() -> ReplyKeyboardMarkup:
+    """Клавиатура для просмотра дня из календаря — ReplyKeyboard."""
+    return ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="➕ Добавить"), KeyboardButton(text="➖ Удалить")],
+        [KeyboardButton(text="◀ Пред. день"), KeyboardButton(text="▶ След. день")],
+        [KeyboardButton(text="📆 К календарю"), KeyboardButton(text="🏠 Главная")]
+    ], resize_keyboard=True)
+
+
+def get_add_type_keyboard() -> ReplyKeyboardMarkup:
+    """Выбор типа добавления."""
+    return ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="🍽 На порцию"), KeyboardButton(text="⚖ На 100г")],
+        [KeyboardButton(text="❌ Отмена")]
+    ], resize_keyboard=True)
+
+
+def get_remove_type_keyboard() -> ReplyKeyboardMarkup:
+    """Выбор типа удаления."""
+    return ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="🍽 На порцию"), KeyboardButton(text="⚖ На 100г")],
+        [KeyboardButton(text="❌ Отмена")]
+    ], resize_keyboard=True)
+
+
+def get_gender_keyboard() -> ReplyKeyboardMarkup:
     """Выбор пола."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="👨 Мужчина", callback_data="gender_male")],
-        [InlineKeyboardButton(text="👩 Женщина", callback_data="gender_female")]
-    ])
+    return ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="👨 Мужчина"), KeyboardButton(text="👩 Женщина")],
+        [KeyboardButton(text="❌ Отмена")]
+    ], resize_keyboard=True)
 
 
-def get_activity_keyboard() -> InlineKeyboardMarkup:
+def get_activity_keyboard() -> ReplyKeyboardMarkup:
     """Выбор активности."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🪑 Сидячий образ жизни", callback_data="activity_1.2")],
-        [InlineKeyboardButton(text="🚶 Лёгкая активность (1-3 раза)", callback_data="activity_1.375")],
-        [InlineKeyboardButton(text="🏃 Умеренная активность (3-5 дней)", callback_data="activity_1.55")],
-        [InlineKeyboardButton(text="🏋️ Высокая активность (6-7 дней)", callback_data="activity_1.725")],
-        [InlineKeyboardButton(text="⚡ Очень высокая активность", callback_data="activity_1.9")]
-    ])
+    return ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="🪑 Сидячий (без нагрузок)")],
+        [KeyboardButton(text="🚶 Лёгкая (1-3 раза/нед)")],
+        [KeyboardButton(text="🏃 Умеренная (3-5 дней/нед)")],
+        [KeyboardButton(text="🏋️ Высокая (6-7 дней/нед)")],
+        [KeyboardButton(text="⚡ Очень высокая")],
+        [KeyboardButton(text="❌ Отмена")]
+    ], resize_keyboard=True)
 
 
-def get_goal_keyboard() -> InlineKeyboardMarkup:
+def get_goal_keyboard() -> ReplyKeyboardMarkup:
     """Выбор цели."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🔥 Похудение", callback_data="goal_loss")],
-        [InlineKeyboardButton(text="⚖️ Поддержание веса", callback_data="goal_maintain")],
-        [InlineKeyboardButton(text="💪 Набор веса", callback_data="goal_gain")]
-    ])
+    return ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="🔥 Похудение")],
+        [KeyboardButton(text="⚖️ Поддержание веса")],
+        [KeyboardButton(text="💪 Набор веса")],
+        [KeyboardButton(text="❌ Отмена")]
+    ], resize_keyboard=True)
 
 
-def get_deficit_keyboard() -> InlineKeyboardMarkup:
-    """Выбор дефицита для похудения."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🟢 Небольшой (-10%)", callback_data="deficit_small")],
-        [InlineKeyboardButton(text="🟡 Средний (-15%)", callback_data="deficit_medium")],
-        [InlineKeyboardButton(text="🔴 Большой (-20%)", callback_data="deficit_large")]
-    ])
+def get_deficit_keyboard() -> ReplyKeyboardMarkup:
+    """Выбор дефицита."""
+    return ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="🟢 Небольшой (-10%)")],
+        [KeyboardButton(text="🟡 Средний (-15%)")],
+        [KeyboardButton(text="🔴 Большой (-20%)")],
+        [KeyboardButton(text="❌ Отмена")]
+    ], resize_keyboard=True)
 
 
-def get_today_keyboard() -> InlineKeyboardMarkup:
-    """Клавиатура для страницы 'Сегодня' с навигацией."""
-    today = date.today()
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="➕ Добавить", callback_data="add_food")],
-        [InlineKeyboardButton(text="➖ Удалить", callback_data="remove_food")],
-        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{today.year}:{today.month}:{today.day}"),
-         InlineKeyboardButton(text=" Главная", callback_data="back_main"),
-         InlineKeyboardButton(text="▶", callback_data=f"day_next:{today.year}:{today.month}:{today.day}")],
-        [InlineKeyboardButton(text="📆 К календарю", callback_data="calendar_main")]
-    ])
-    return keyboard
+def get_cancel_keyboard() -> ReplyKeyboardMarkup:
+    """Кнопка отмены."""
+    return ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="❌ Отмена")]
+    ], resize_keyboard=True)
 
 
-def get_add_food_type_keyboard() -> InlineKeyboardMarkup:
-    """Выбор типа ввода: на порцию или на 100г."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🍽 На порцию", callback_data="add_per_serving")],
-        [InlineKeyboardButton(text="⚖ На 100г", callback_data="add_per_100g")],
-        [InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_add")]
-    ])
-
+# ===== INLINE KEYBOARDS (для календаря) =====
 
 def get_calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
-    """Клавиатура календаря на месяц."""
+    """Клавиатура календаря на месяц — inline."""
     cal = calendar.Calendar(firstweekday=calendar.MONDAY)
     month_days = cal.monthdayscalendar(year, month)
     month_name = calendar.month_name[month]
@@ -122,34 +146,3 @@ def get_calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
     buttons.append(footer_row)
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-def get_day_view_keyboard(year: int, month: int, day: int) -> InlineKeyboardMarkup:
-    """Клавиатура для просмотра конкретного дня с навигацией."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="➕ Добавить", callback_data=f"add_food_day:{year}:{month}:{day}")],
-        [InlineKeyboardButton(text="➖ Удалить", callback_data=f"remove_food_day:{year}:{month}:{day}")],
-        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{year}:{month}:{day}"),
-         InlineKeyboardButton(text="📆 К календарю", callback_data=f"calendar_month:{year}:{month}"),
-         InlineKeyboardButton(text="▶", callback_data=f"day_next:{year}:{month}:{day}")],
-        [InlineKeyboardButton(text="🏠 Главная", callback_data="back_main")]
-    ])
-
-
-def get_day_view_keyboard_with_add_type(year: int, month: int, day: int) -> InlineKeyboardMarkup:
-    """Клавиатура для дня с выбором типа добавления."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🍽 На порцию", callback_data=f"add_serving_day:{year}:{month}:{day}")],
-        [InlineKeyboardButton(text="⚖ На 100г", callback_data=f"add_100g_day:{year}:{month}:{day}")],
-        [InlineKeyboardButton(text="◀", callback_data=f"day_prev:{year}:{month}:{day}"),
-         InlineKeyboardButton(text="📆 К календарю", callback_data=f"calendar_month:{year}:{month}"),
-         InlineKeyboardButton(text="▶", callback_data=f"day_next:{year}:{month}:{day}")],
-        [InlineKeyboardButton(text="🏠 Главная", callback_data="back_main")]
-    ])
-
-
-def get_cancel_keyboard() -> InlineKeyboardMarkup:
-    """Кнопка отмены."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_action")]
-    ])
