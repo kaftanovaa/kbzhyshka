@@ -178,11 +178,7 @@ def get_status_text(current: float, norm: float, label: str) -> str:
     if norm == 0:
         return ""
     percent = int((current / norm) * 100)
-    if current >= norm:
-        over = percent - 100
-        return f"{label}: {format_number(current)}г/{format_number(norm)}г ✅ Добор: +{over}%"
-    else:
-        return f"{label}: {format_number(current)}г/{format_number(norm)}г 😞 Недобор: {percent}%"
+    return f"{label}: {format_number(current)}г/{format_number(norm)}г ({percent}%)"
 
 
 def get_day_status(current: float, norm: float) -> str:
@@ -190,11 +186,7 @@ def get_day_status(current: float, norm: float) -> str:
     if norm == 0:
         return ""
     percent = int((current / norm) * 100)
-    if current >= norm:
-        over = percent - 100
-        return f"✅ Добор: +{over}%"
-    else:
-        return f"😞 Недобор: {percent}%"
+    return f"{percent}%"
 
 
 # ================== КОМАНДА /START ==================
@@ -494,7 +486,7 @@ async def process_add_serving(message: Message, state: FSMContext):
             f"🥩 Белки: <b>{format_number(total_prot)}</b>г\n"
             f"🥑 Жиры: <b>{format_number(total_fat)}</b>г\n"
             f"🍞 Углеводы: <b>{format_number(total_carb)}</b>г\n\n"
-            f"✅ Добавлено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г"
+            f"Добавлено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г"
         )
         keyboard = get_today_keyboard()
     else:
@@ -505,7 +497,7 @@ async def process_add_serving(message: Message, state: FSMContext):
             f"🥩 Белки: <b>{format_number(total_prot)}</b>г\n"
             f"🥑 Жиры: <b>{format_number(total_fat)}</b>г\n"
             f"🍞 Углеводы: <b>{format_number(total_carb)}</b>г\n\n"
-            f"✅ Добавлено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г"
+            f"Добавлено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г"
         )
         keyboard = get_day_view_keyboard(year, month, day)
 
@@ -571,7 +563,7 @@ async def process_add_100g(message: Message, state: FSMContext):
             f"🥩 Белки: <b>{format_number(total_prot)}</b>г\n"
             f"🥑 Жиры: <b>{format_number(total_fat)}</b>г\n"
             f"🍞 Углеводы: <b>{format_number(total_carb)}</b>г\n\n"
-            f"✅ Добавлено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г\n"
+            f"Добавлено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г\n"
             f"<i>(Для {format_number(weight)}г)</i>"
         )
         keyboard = get_today_keyboard()
@@ -583,7 +575,7 @@ async def process_add_100g(message: Message, state: FSMContext):
             f"🥩 Белки: <b>{format_number(total_prot)}</b>г\n"
             f"🥑 Жиры: <b>{format_number(total_fat)}</b>г\n"
             f"🍞 Углеводы: <b>{format_number(total_carb)}</b>г\n\n"
-            f"✅ Добавлено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г\n"
+            f"Добавлено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г\n"
             f"<i>(Для {format_number(weight)}г)</i>"
         )
         keyboard = get_day_view_keyboard(year, month, day)
@@ -651,7 +643,7 @@ async def process_remove_food(message: Message, state: FSMContext):
             f"🥩 Белки: <b>{format_number(total_prot)}</b>г\n"
             f"🥑 Жиры: <b>{format_number(total_fat)}</b>г\n"
             f"🍞 Углеводы: <b>{format_number(total_carb)}</b>г\n\n"
-            f"✅ Удалено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г"
+            f"Удалено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г"
         )
         keyboard = get_today_keyboard()
     else:
@@ -662,7 +654,7 @@ async def process_remove_food(message: Message, state: FSMContext):
             f"🥩 Белки: <b>{format_number(total_prot)}</b>г\n"
             f"🥑 Жиры: <b>{format_number(total_fat)}</b>г\n"
             f"🍞 Углеводы: <b>{format_number(total_carb)}</b>г\n\n"
-            f"✅ Удалено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г"
+            f"Удалено: {format_number(cal)} ккал / {format_number(prot)}г / {format_number(fat)}г / {format_number(carb)}г"
         )
         keyboard = get_day_view_keyboard(year, month, day)
 
@@ -968,20 +960,9 @@ async def show_week_stats(callback: CallbackQuery):
         lines.append(f"  🔥 {format_number(cal)} ккал | 🥩 {format_number(prot)}г | 🥑 {format_number(fat)}г | 🍞 {format_number(carb)}г")
 
         if settings:
-            statuses = []
-            if cal >= settings["daily_calories"]:
-                p = int((cal / settings["daily_calories"]) * 100) - 100
-                statuses.append(f"ккал ✅+{p}%")
-            else:
-                p = int((cal / settings["daily_calories"]) * 100)
-                statuses.append(f"ккал 😞{p}%")
-            if prot >= settings["protein_norm"]:
-                p = int((prot / settings["protein_norm"]) * 100) - 100
-                statuses.append(f"бел ✅+{p}%")
-            else:
-                p = int((prot / settings["protein_norm"]) * 100)
-                statuses.append(f"бел 😞{p}%")
-            lines.append(f"  {' | '.join(statuses)}")
+            cal_p = int((cal / settings["daily_calories"]) * 100)
+            prot_p = int((prot / settings["protein_norm"]) * 100)
+            lines.append(f"  ккал {cal_p}% | бел {prot_p}%")
 
         lines.append("")
 
@@ -995,16 +976,9 @@ async def show_week_stats(callback: CallbackQuery):
         lines.append(f"  🥑 {format_number(total_fat)}/{format_number(settings['fat_norm'])}г")
         lines.append(f"  🍞 {format_number(total_carb)}/{format_number(settings['carbs_norm'])}г")
         lines.append("")
-
-        # Общий статус по калориям
-        cal_ok = total_cal >= settings["daily_calories"]
-        prot_ok = total_prot >= settings["protein_norm"]
-        if cal_ok and prot_ok:
-            p = int((total_cal / settings["daily_calories"]) * 100) - 100
-            lines.append(f"✅ <b>Добор: +{p}%</b> ✅")
-        else:
-            p = int((total_cal / settings["daily_calories"]) * 100)
-            lines.append(f"😞 <b>Недобор: {p}%</b> 😞")
+        cal_p = int((total_cal / settings["daily_calories"]) * 100)
+        prot_p = int((total_prot / settings["protein_norm"]) * 100)
+        lines.append(f"<b>Итого: ккал {cal_p}% | бел {prot_p}%</b>")
     else:
         lines.append(f"  🔥 {format_number(total_cal)} ккал")
         lines.append(f"  🥩 {format_number(total_prot)}г | 🥑 {format_number(total_fat)}г | 🍞 {format_number(total_carb)}г")
@@ -1054,15 +1028,9 @@ async def show_month_stats(callback: CallbackQuery):
         lines.append(f"  🥑 {format_number(total_fat)}/{format_number(settings['fat_norm'])}г")
         lines.append(f"  🍞 {format_number(total_carb)}/{format_number(settings['carbs_norm'])}г")
         lines.append("")
-
-        cal_ok = total_cal >= settings["daily_calories"]
-        prot_ok = total_prot >= settings["protein_norm"]
-        if cal_ok and prot_ok:
-            p = int((total_cal / settings["daily_calories"]) * 100) - 100
-            lines.append(f"✅ <b>Добор: +{p}%</b> ✅")
-        else:
-            p = int((total_cal / settings["daily_calories"]) * 100)
-            lines.append(f"😞 <b>Недобор: {p}%</b> 😞")
+        cal_p = int((total_cal / settings["daily_calories"]) * 100)
+        prot_p = int((total_prot / settings["protein_norm"]) * 100)
+        lines.append(f"<b>Итого: ккал {cal_p}% | бел {prot_p}%</b>")
     else:
         lines.append(f"  🔥 {format_number(total_cal)} ккал")
         lines.append(f"  🥩 {format_number(total_prot)}г | 🥑 {format_number(total_fat)}г | 🍞 {format_number(total_carb)}г")
