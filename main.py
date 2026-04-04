@@ -56,6 +56,9 @@ dp = Dispatcher()
 # ================== УТИЛИТЫ ==================
 
 def format_number(num: float) -> str:
+    num = max(0, num)  # Запрещаем отрицательные значения
+    if num == 0:
+        return "0"
     if num == int(num):
         return str(int(num))
     return f"{num:.1f}".rstrip('0').rstrip('.')

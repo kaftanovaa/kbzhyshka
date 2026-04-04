@@ -162,10 +162,10 @@ def get_daily_totals(user_id: int, record_date: str) -> tuple:
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute(
-        """SELECT COALESCE(SUM(calories), 0) as total_calories,
-                  COALESCE(SUM(protein), 0) as total_protein,
-                  COALESCE(SUM(fat), 0) as total_fat,
-                  COALESCE(SUM(carbs), 0) as total_carbs
+        """SELECT GREATEST(0, COALESCE(SUM(calories), 0)) as total_calories,
+                  GREATEST(0, COALESCE(SUM(protein), 0)) as total_protein,
+                  GREATEST(0, COALESCE(SUM(fat), 0)) as total_fat,
+                  GREATEST(0, COALESCE(SUM(carbs), 0)) as total_carbs
            FROM food_entries
            WHERE user_id = %s AND entry_date = %s""",
         (user_id, record_date)
@@ -242,10 +242,10 @@ def get_week_stats(user_id: int, start_date: str, end_date: str) -> list:
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute(
         """SELECT entry_date,
-                  COALESCE(SUM(calories), 0) as total_calories,
-                  COALESCE(SUM(protein), 0) as total_protein,
-                  COALESCE(SUM(fat), 0) as total_fat,
-                  COALESCE(SUM(carbs), 0) as total_carbs
+                  GREATEST(0, COALESCE(SUM(calories), 0)) as total_calories,
+                  GREATEST(0, COALESCE(SUM(protein), 0)) as total_protein,
+                  GREATEST(0, COALESCE(SUM(fat), 0)) as total_fat,
+                  GREATEST(0, COALESCE(SUM(carbs), 0)) as total_carbs
            FROM food_entries
            WHERE user_id = %s AND entry_date >= %s AND entry_date <= %s
            GROUP BY entry_date
@@ -271,10 +271,10 @@ def get_month_stats(user_id: int, year: int, month: int) -> list:
 
     cursor.execute(
         """SELECT entry_date,
-                  COALESCE(SUM(calories), 0) as total_calories,
-                  COALESCE(SUM(protein), 0) as total_protein,
-                  COALESCE(SUM(fat), 0) as total_fat,
-                  COALESCE(SUM(carbs), 0) as total_carbs
+                  GREATEST(0, COALESCE(SUM(calories), 0)) as total_calories,
+                  GREATEST(0, COALESCE(SUM(protein), 0)) as total_protein,
+                  GREATEST(0, COALESCE(SUM(fat), 0)) as total_fat,
+                  GREATEST(0, COALESCE(SUM(carbs), 0)) as total_carbs
            FROM food_entries
            WHERE user_id = %s AND entry_date >= %s AND entry_date < %s
            GROUP BY entry_date
