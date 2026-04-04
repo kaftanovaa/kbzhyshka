@@ -276,7 +276,8 @@ async def show_week_stats_text(message: Message, user_id: int):
             current += timedelta(days=1)
 
         for row in stats:
-            all_days[row["entry_date"]] = {
+            entry_date_str = str(row["entry_date"])
+            all_days[entry_date_str] = {
                 "calories": float(row["total_calories"]),
                 "protein": float(row["total_protein"]),
                 "fat": float(row["total_fat"]),
