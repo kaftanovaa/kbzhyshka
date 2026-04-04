@@ -14,7 +14,6 @@ if not DATABASE_URL:
 
 def get_connection():
     """Получить соединение с базой данных."""
-    # Добавляем SSL режим для Railway
     return psycopg2.connect(DATABASE_URL, sslmode="require")
 
 
@@ -32,27 +31,36 @@ def init_db():
         )
     """)
 
-    # Таблица записей БЖ за каждый день
+    # Таблица настроек пользователя (персонализированные нормы)
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS records (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER,
-            record_date DATE,
-            protein REAL DEFAULT 0,
-            fat REAL DEFAULT 0,
-            FOREIGN KEY (user_id) REFERENCES users(user_id),
-            UNIQUE(user_id, record_date)
+        CREATE TABLE IF NOT EXISTS user_settings (
+            user_id INTEGER PRIMARY KEY,
+            gender TEXT,
+            weight REAL,
+            height REAL,
+            age INTEGER,
+            activity_coefficient REAL,
+            activity_label TEXT,
+            goal TEXT,
+            deficit_label TEXT,
+            daily_calories REAL,
+            protein_norm REAL,
+            fat_norm REAL,
+            carbs_norm REAL,
+            FOREIGN KEY (user_id) REFERENCES users(user_id)
         )
     """)
 
-    # Таблица отдельных записей "ням-ням" (для удаления/редактирования)
+    # Таблица отдельных записей еды (КБЖУ)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS food_entries (
             id SERIAL PRIMARY KEY,
             user_id INTEGER,
             entry_date DATE,
+            calories REAL,
             protein REAL,
             fat REAL,
+            carbs REAL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -83,27 +91,79 @@ def user_exists(user_id: int) -> bool:
     return result is not None
 
 
-def add_food_entry(user_id: int, entry_date: str, protein: float, fat: float):
+def user_has_settings(user_id: int) -> bool:
+    """Проверить, есть ли у пользователя настройки."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT 1 FROM user_settings WHERE user_id = %s", (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+    return result is not None
+
+
+def save_user_settings(user_id: int, gender: str, weight: float, height: float, age: int,
+                       activity_coefficient: float, activity_label: str, goal: str,
+                       deficit_label: Optional[str], daily_calories: float,
+                       protein_norm: float, fat_norm: float, carbs_norm: float):
+    """Сохранить персонализированные нормы пользователя."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO user_settings (user_id, gender, weight, height, age, activity_coefficient,
+                                   activity_label, goal, deficit_label, daily_calories,
+                                   protein_norm, fat_norm, carbs_norm)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (user_id) DO UPDATE SET
+            gender = %s, weight = %s, height = %s, age = %s,
+            activity_coefficient = %s, activity_label = %s, goal = %s,
+            deficit_label = %s, daily_calories = %s,
+            protein_norm = %s, fat_norm = %s, carbs_norm = %s
+    """, (
+        user_id, gender, weight, height, age, activity_coefficient,
+        activity_label, goal, deficit_label, daily_calories,
+        protein_norm, fat_norm, carbs_norm,
+        # Для ON CONFLICT DO UPDATE
+        gender, weight, height, age,
+        activity_coefficient, activity_label, goal,
+        deficit_label, daily_calories,
+        protein_norm, fat_norm, carbs_norm
+    ))
+    conn.commit()
+    conn.close()
+
+
+def get_user_settings(user_id: int) -> Optional[dict]:
+    """Получить настройки пользователя."""
+    conn = get_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("SELECT * FROM user_settings WHERE user_id = %s", (user_id,))
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return dict(result)
+    return None
+
+
+def add_food_entry(user_id: int, entry_date: str, calories: float, protein: float, fat: float, carbs: float):
     """Добавить запись о еде."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO food_entries (user_id, entry_date, protein, fat) VALUES (%s, %s, %s, %s)",
-        (user_id, entry_date, protein, fat)
+        "INSERT INTO food_entries (user_id, entry_date, calories, protein, fat, carbs) VALUES (%s, %s, %s, %s, %s, %s)",
+        (user_id, entry_date, calories, protein, fat, carbs)
     )
     conn.commit()
     conn.close()
 
 
-def remove_food_entry(user_id: int, entry_date: str, protein: float, fat: float):
+def remove_food_entry(user_id: int, entry_date: str, calories: float, protein: float, fat: float, carbs: float):
     """Вычесть значения из суммы за день (добавить отрицательную запись)."""
     conn = get_connection()
     cursor = conn.cursor()
-    # Просто добавляем запись с отрицательными значениями - она вычтется из суммы
     cursor.execute(
-        """INSERT INTO food_entries (user_id, entry_date, protein, fat)
-           VALUES (%s, %s, %s, %s)""",
-        (user_id, entry_date, -protein, -fat)
+        """INSERT INTO food_entries (user_id, entry_date, calories, protein, fat, carbs)
+           VALUES (%s, %s, %s, %s, %s, %s)""",
+        (user_id, entry_date, -calories, -protein, -fat, -carbs)
     )
     conn.commit()
     conn.close()
@@ -111,19 +171,26 @@ def remove_food_entry(user_id: int, entry_date: str, protein: float, fat: float)
 
 
 def get_daily_totals(user_id: int, record_date: str) -> tuple:
-    """Получить суммарные БЖ за день."""
+    """Получить суммарные КБЖУ за день."""
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute(
-        """SELECT COALESCE(SUM(protein), 0) as total_protein,
-                  COALESCE(SUM(fat), 0) as total_fat
+        """SELECT COALESCE(SUM(calories), 0) as total_calories,
+                  COALESCE(SUM(protein), 0) as total_protein,
+                  COALESCE(SUM(fat), 0) as total_fat,
+                  COALESCE(SUM(carbs), 0) as total_carbs
            FROM food_entries
            WHERE user_id = %s AND entry_date = %s""",
         (user_id, record_date)
     )
     result = cursor.fetchone()
     conn.close()
-    return (float(result["total_protein"]), float(result["total_fat"]))
+    return (
+        float(result["total_calories"]),
+        float(result["total_protein"]),
+        float(result["total_fat"]),
+        float(result["total_carbs"])
+    )
 
 
 def get_food_entries_for_date(user_id: int, record_date: str) -> list:
@@ -131,7 +198,7 @@ def get_food_entries_for_date(user_id: int, record_date: str) -> list:
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute(
-        """SELECT id, protein, fat, created_at
+        """SELECT id, calories, protein, fat, carbs, created_at
            FROM food_entries
            WHERE user_id = %s AND entry_date = %s
            ORDER BY created_at DESC""",
@@ -161,7 +228,6 @@ def get_dates_with_entries(user_id: int, year: int, month: int) -> list:
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-    # Первый и последний день месяца
     if month == 12:
         next_year = year + 1
         next_month = 1
@@ -189,8 +255,10 @@ def get_week_stats(user_id: int, start_date: str, end_date: str) -> list:
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     cursor.execute(
         """SELECT entry_date,
+                  COALESCE(SUM(calories), 0) as total_calories,
                   COALESCE(SUM(protein), 0) as total_protein,
-                  COALESCE(SUM(fat), 0) as total_fat
+                  COALESCE(SUM(fat), 0) as total_fat,
+                  COALESCE(SUM(carbs), 0) as total_carbs
            FROM food_entries
            WHERE user_id = %s AND entry_date >= %s AND entry_date <= %s
            GROUP BY entry_date
@@ -207,7 +275,6 @@ def get_month_stats(user_id: int, year: int, month: int) -> list:
     conn = get_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-    # Первый и последний день месяца
     if month == 12:
         next_year = year + 1
         next_month = 1
@@ -217,8 +284,10 @@ def get_month_stats(user_id: int, year: int, month: int) -> list:
 
     cursor.execute(
         """SELECT entry_date,
+                  COALESCE(SUM(calories), 0) as total_calories,
                   COALESCE(SUM(protein), 0) as total_protein,
-                  COALESCE(SUM(fat), 0) as total_fat
+                  COALESCE(SUM(fat), 0) as total_fat,
+                  COALESCE(SUM(carbs), 0) as total_carbs
            FROM food_entries
            WHERE user_id = %s AND entry_date >= %s AND entry_date < %s
            GROUP BY entry_date
