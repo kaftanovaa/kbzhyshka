@@ -22,48 +22,35 @@ def init_db():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Таблица пользователей
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            user_id INTEGER PRIMARY KEY,
-            username TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
+    cursor.execute("""CREATE TABLE IF NOT EXISTS users (
+        user_id INTEGER PRIMARY KEY,
+        username TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )""")
 
-    # Таблица настроек пользователя (персонализированные нормы)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS user_settings (
-            user_id INTEGER PRIMARY KEY,
-            gender TEXT,
-            weight REAL,
-            height REAL,
-            age INTEGER,
-            activity_coefficient REAL,
-            activity_label TEXT,
-            goal TEXT,
-            deficit_label TEXT,
-            daily_calories REAL,
-            protein_norm REAL,
-            fat_norm REAL,
-            carbs_norm REAL,
-            FOREIGN KEY (user_id) REFERENCES users(user_id)
-        )
-    """)
+    cursor.execute("""CREATE TABLE IF NOT EXISTS user_settings (
+        user_id INTEGER PRIMARY KEY,
+        gender TEXT, weight REAL, height REAL, age INTEGER,
+        activity_coefficient REAL, activity_label TEXT,
+        goal TEXT, deficit_label TEXT,
+        daily_calories REAL, protein_norm REAL, fat_norm REAL, carbs_norm REAL,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )""")
 
-    # Таблица отдельных записей еды (КБЖУ)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS food_entries (
-            id SERIAL PRIMARY KEY,
-            user_id INTEGER,
-            entry_date DATE,
-            calories REAL,
-            protein REAL,
-            fat REAL,
-            carbs REAL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
+    cursor.execute("""CREATE TABLE IF NOT EXISTS food_entries (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER, entry_date DATE,
+        calories REAL DEFAULT 0, protein REAL DEFAULT 0,
+        fat REAL DEFAULT 0, carbs REAL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )""")
+
+    # Миграция: добавляем новые колонки, если их нет (безопасно для повторных запусков)
+    for col_name, col_type in [("calories", "REAL DEFAULT 0"), ("carbs", "REAL DEFAULT 0")]:
+        try:
+            cursor.execute(f"ALTER TABLE food_entries ADD COLUMN {col_name} {col_type}")
+        except Exception:
+            conn.rollback()  # Колонка уже существует — игнорируем ошибку
 
     conn.commit()
     conn.close()

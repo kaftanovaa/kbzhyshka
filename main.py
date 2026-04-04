@@ -200,7 +200,7 @@ def get_day_status(current: float, norm: float) -> str:
 # ================== КОМАНДА /START ==================
 
 @dp.message(Command("start"))
-async def cmd_start(message: Message):
+async def cmd_start(message: Message, state: FSMContext):
     user_id = message.from_user.id
     username = message.from_user.username
 
@@ -209,13 +209,13 @@ async def cmd_start(message: Message):
 
     settings = get_user_settings(user_id)
     if settings:
-        # Пользователь уже зарегистрирован
+        await state.clear()
         await message.answer(
             "🤫 Запиши, сколько КБЖУ ты скушал сегодня",
             reply_markup=get_main_keyboard(has_settings=True)
         )
     else:
-        # Новый пользователь — начинаем онбординг
+        await state.set_state(Onboarding.waiting_gender)
         await message.answer(
             "Привет! Я бот для подсчёта КБЖУ (калории, белки, жиры, углеводы).\n\n"
             "Давай рассчитаю твою персональную норму! 🎯\n\n"
@@ -225,7 +225,6 @@ async def cmd_start(message: Message):
             "Выбери пол:",
             reply_markup=get_gender_keyboard()
         )
-        await Onboarding.waiting_gender.set()
 
 
 # ================== ОНБОРДИНГ ==================
