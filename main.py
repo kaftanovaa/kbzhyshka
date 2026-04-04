@@ -971,14 +971,15 @@ async def show_week_stats(callback: CallbackQuery):
     lines.append(f"<b>📊 ИТОГО ЗА НЕДЕЛЮ</b>")
 
     if settings:
-        lines.append(f"  🔥 {format_number(total_cal)}/{format_number(settings['daily_calories'])} ккал")
-        lines.append(f"  🥩 {format_number(total_prot)}/{format_number(settings['protein_norm'])}г")
-        lines.append(f"  🥑 {format_number(total_fat)}/{format_number(settings['fat_norm'])}г")
-        lines.append(f"  🍞 {format_number(total_carb)}/{format_number(settings['carbs_norm'])}г")
+        week_days = (end - start).days + 1
+        lines.append(f"  🔥 Набрано {format_number(total_cal)} из {format_number(settings['daily_calories'] * week_days)} ккал")
+        lines.append(f"  🥩 Набрано {format_number(total_prot)} из {format_number(settings['protein_norm'] * week_days)}г белка")
+        lines.append(f"  🥑 Набрано {format_number(total_fat)} из {format_number(settings['fat_norm'] * week_days)}г жира")
+        lines.append(f"  🍞 Набрано {format_number(total_carb)} из {format_number(settings['carbs_norm'] * week_days)}г углеводов")
         lines.append("")
-        cal_p = int((total_cal / settings["daily_calories"]) * 100)
-        prot_p = int((total_prot / settings["protein_norm"]) * 100)
-        lines.append(f"<b>Итого: ккал {cal_p}% | бел {prot_p}%</b>")
+        cal_p = int((total_cal / (settings["daily_calories"] * week_days)) * 100) if settings["daily_calories"] * week_days > 0 else 0
+        prot_p = int((total_prot / (settings["protein_norm"] * week_days)) * 100) if settings["protein_norm"] * week_days > 0 else 0
+        lines.append(f"<b>Общий итог: ккал {cal_p}% | бел {prot_p}%</b>")
     else:
         lines.append(f"  🔥 {format_number(total_cal)} ккал")
         lines.append(f"  🥩 {format_number(total_prot)}г | 🥑 {format_number(total_fat)}г | 🍞 {format_number(total_carb)}г")
@@ -1023,14 +1024,16 @@ async def show_month_stats(callback: CallbackQuery):
     lines.append("")
 
     if settings:
-        lines.append(f"  🔥 {format_number(total_cal)}/{format_number(settings['daily_calories'])} ккал")
-        lines.append(f"  🥩 {format_number(total_prot)}/{format_number(settings['protein_norm'])}г")
-        lines.append(f"  🥑 {format_number(total_fat)}/{format_number(settings['fat_norm'])}г")
-        lines.append(f"  🍞 {format_number(total_carb)}/{format_number(settings['carbs_norm'])}г")
+        import calendar as cal_mod
+        days_in_month = cal_mod.monthrange(year, month)[1]
+        lines.append(f"  🔥 Набрано {format_number(total_cal)} из {format_number(settings['daily_calories'] * days_in_month)} ккал")
+        lines.append(f"  🥩 Набрано {format_number(total_prot)} из {format_number(settings['protein_norm'] * days_in_month)}г белка")
+        lines.append(f"  🥑 Набрано {format_number(total_fat)} из {format_number(settings['fat_norm'] * days_in_month)}г жира")
+        lines.append(f"  🍞 Набрано {format_number(total_carb)} из {format_number(settings['carbs_norm'] * days_in_month)}г углеводов")
         lines.append("")
-        cal_p = int((total_cal / settings["daily_calories"]) * 100)
-        prot_p = int((total_prot / settings["protein_norm"]) * 100)
-        lines.append(f"<b>Итого: ккал {cal_p}% | бел {prot_p}%</b>")
+        cal_p = int((total_cal / (settings["daily_calories"] * days_in_month)) * 100) if settings["daily_calories"] * days_in_month > 0 else 0
+        prot_p = int((total_prot / (settings["protein_norm"] * days_in_month)) * 100) if settings["protein_norm"] * days_in_month > 0 else 0
+        lines.append(f"<b>Общий итог: ккал {cal_p}% | бел {prot_p}%</b>")
     else:
         lines.append(f"  🔥 {format_number(total_cal)} ккал")
         lines.append(f"  🥩 {format_number(total_prot)}г | 🥑 {format_number(total_fat)}г | 🍞 {format_number(total_carb)}г")
