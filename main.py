@@ -38,11 +38,13 @@ class Onboarding(StatesGroup):
 
 
 class FoodAdd(StatesGroup):
+    waiting_type = State()
     waiting_serving = State()
     waiting_100g = State()
 
 
 class FoodRemove(StatesGroup):
+    waiting_type = State()
     waiting_serving = State()
     waiting_100g = State()
 
@@ -228,11 +230,11 @@ async def handle_main_button(message: Message, state: FSMContext):
 
     elif text == "➕ Добавить":
         await message.answer("Выбери тип ввода:", reply_markup=get_add_type_keyboard())
-        await FoodAdd.waiting_serving.set()  # временное состояние, переключится при выборе
+        await state.set_state(FoodAdd.waiting_type)
 
     elif text == "➖ Удалить":
         await message.answer("Выбери тип удаления:", reply_markup=get_remove_type_keyboard())
-        await FoodRemove.waiting_serving.set()
+        await state.set_state(FoodRemove.waiting_type)
 
     elif text == "◀ Вчера" or text == "◀ Пред. день":
         data = await state.get_data()
@@ -499,8 +501,18 @@ async def handle_text_message(message: Message, state: FSMContext):
         return
 
     # --- Добавление еды ---
+    if current_state == FoodAdd.waiting_type.state:
+        if text == "🍽 На порцию":
+            await message.answer("Введи: <b>Калории/Белки/Жиры/Углеводы</b>\nПример: 200/30/15/45",
+                                 reply_markup=get_cancel_keyboard(), parse_mode="HTML")
+            await state.set_state(FoodAdd.waiting_serving)
+        elif text == "⚖ На 100г":
+            await message.answer("Введи: <b>Калории/Белки/Жиры/Углеводы Вес</b>\nПример: 100/20/30/40 150",
+                                 reply_markup=get_cancel_keyboard(), parse_mode="HTML")
+            await state.set_state(FoodAdd.waiting_100g)
+        return
+
     if current_state == FoodAdd.waiting_serving.state:
-        # Это был выбор "на порцию" через текст, но теперь мы обрабатываем ввод данных
         result = parse_serving_input(text)
         if result is None:
             await message.answer("❌ Некорректный ввод. Формат: <b>Калории/Белки/Жиры/Углеводы</b>\nПример: 200/30/15/45",
@@ -518,7 +530,17 @@ async def handle_text_message(message: Message, state: FSMContext):
         await process_add_100g(message, state, result)
         return
 
-    # --- Удаление еды ---
+    if current_state == FoodRemove.waiting_type.state:
+        if text == "🍽 На порцию":
+            await message.answer("Введи: <b>Калории/Белки/Жиры/Углеводы</b>\nПример: 200/30/15/45",
+                                 reply_markup=get_cancel_keyboard(), parse_mode="HTML")
+            await state.set_state(FoodRemove.waiting_serving)
+        elif text == "⚖ На 100г":
+            await message.answer("Введи: <b>Калории/Белки/Жиры/Углеводы Вес</b>\nПример: 100/20/30/40 150",
+                                 reply_markup=get_cancel_keyboard(), parse_mode="HTML")
+            await state.set_state(FoodRemove.waiting_100g)
+        return
+
     if current_state == FoodRemove.waiting_serving.state:
         result = parse_serving_input(text)
         if result is None:
