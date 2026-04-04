@@ -261,67 +261,70 @@ async def handle_main_button(message: Message, state: FSMContext):
 
 
 async def show_week_stats_text(message: Message, user_id: int):
-    start_date, end_date = get_week_range()
-    stats = get_week_stats(user_id, start_date, end_date)
-    settings = get_user_settings(user_id)
+    try:
+        start_date, end_date = get_week_range()
+        stats = get_week_stats(user_id, start_date, end_date)
+        settings = get_user_settings(user_id)
 
-    start = date.fromisoformat(start_date)
-    end = date.fromisoformat(end_date)
+        start = date.fromisoformat(start_date)
+        end = date.fromisoformat(end_date)
 
-    all_days = {}
-    current = start
-    while current <= end:
-        all_days[current.isoformat()] = {"calories": 0, "protein": 0, "fat": 0, "carbs": 0}
-        current += timedelta(days=1)
+        all_days = {}
+        current = start
+        while current <= end:
+            all_days[current.isoformat()] = {"calories": 0, "protein": 0, "fat": 0, "carbs": 0}
+            current += timedelta(days=1)
 
-    for row in stats:
-        all_days[row["entry_date"]] = {
-            "calories": float(row["total_calories"]),
-            "protein": float(row["total_protein"]),
-            "fat": float(row["total_fat"]),
-            "carbs": float(row["total_carbs"])
-        }
+        for row in stats:
+            all_days[row["entry_date"]] = {
+                "calories": float(row["total_calories"]),
+                "protein": float(row["total_protein"]),
+                "fat": float(row["total_fat"]),
+                "carbs": float(row["total_carbs"])
+            }
 
-    lines = []
-    total_cal = total_prot = total_fat = total_carb = 0.0
+        lines = []
+        total_cal = total_prot = total_fat = total_carb = 0.0
 
-    for date_str in sorted(all_days.keys()):
-        data = all_days[date_str]
-        day_name = get_day_name(date_str)
-        d = date.fromisoformat(date_str)
-        cal = data["calories"]
-        prot = data["protein"]
-        fat = data["fat"]
-        carb = data["carbs"]
-        total_cal += cal
-        total_prot += prot
-        total_fat += fat
-        total_carb += carb
+        for date_str in sorted(all_days.keys()):
+            data = all_days[date_str]
+            day_name = get_day_name(date_str)
+            d = date.fromisoformat(date_str)
+            cal = data["calories"]
+            prot = data["protein"]
+            fat = data["fat"]
+            carb = data["carbs"]
+            total_cal += cal
+            total_prot += prot
+            total_fat += fat
+            total_carb += carb
 
-        lines.append(f"<b>{d.strftime('%d.%m.%Y')} ({day_name})</b>")
-        lines.append(f"  🔥 {format_number(cal)} ккал | 🥩 {format_number(prot)}г | 🥑 {format_number(fat)}г | 🍞 {format_number(carb)}г")
+            lines.append(f"<b>{d.strftime('%d.%m.%Y')} ({day_name})</b>")
+            lines.append(f"  🔥 {format_number(cal)} ккал | 🥩 {format_number(prot)}г | 🥑 {format_number(fat)}г | 🍞 {format_number(carb)}г")
+            lines.append("")
 
-        lines.append("")
+        lines.append("━━━━━━━━━━━━━━━━━━━━")
+        lines.append(f"<b>📊 ИТОГО ЗА НЕДЕЛЮ</b>")
 
-    lines.append("━━━━━━━━━━━━━━━━━━━━")
-    lines.append(f"<b>📊 ИТОГО ЗА НЕДЕЛЮ</b>")
+        if settings:
+            week_days = (end - start).days + 1
+            norm_cal = settings["daily_calories"] * week_days
+            norm_prot = settings["protein_norm"] * week_days
+            norm_fat = settings["fat_norm"] * week_days
+            norm_carb = settings["carbs_norm"] * week_days
 
-    if settings:
-        week_days = (end - start).days + 1
-        norm_cal = settings["daily_calories"] * week_days
-        norm_prot = settings["protein_norm"] * week_days
-        norm_fat = settings["fat_norm"] * week_days
-        norm_carb = settings["carbs_norm"] * week_days
+            lines.append(f"  🔥 Набрано {format_number(total_cal)} из {format_number(norm_cal)} ккал")
+            lines.append(f"  🥩 Набрано {format_number(total_prot)} из {format_number(norm_prot)}г белка")
+            lines.append(f"  🥑 Набрано {format_number(total_fat)} из {format_number(norm_fat)}г жира")
+            lines.append(f"  🍞 Набрано {format_number(total_carb)} из {format_number(norm_carb)}г углеводов")
+        else:
+            lines.append(f"  🔥 {format_number(total_cal)} ккал")
+            lines.append(f"  🥩 {format_number(total_prot)}г | 🥑 {format_number(total_fat)}г | 🍞 {format_number(total_carb)}г")
 
-        lines.append(f"  🔥 Набрано {format_number(total_cal)} из {format_number(norm_cal)} ккал")
-        lines.append(f"  🥩 Набрано {format_number(total_prot)} из {format_number(norm_prot)}г белка")
-        lines.append(f"  🥑 Набрано {format_number(total_fat)} из {format_number(norm_fat)}г жира")
-        lines.append(f"  🍞 Набрано {format_number(total_carb)} из {format_number(norm_carb)}г углеводов")
-    else:
-        lines.append(f"  🔥 {format_number(total_cal)} ккал")
-        lines.append(f"  🥩 {format_number(total_prot)}г | 🥑 {format_number(total_fat)}г | 🍞 {format_number(total_carb)}г")
-
-    await message.answer("\n".join(lines), reply_markup=get_main_keyboard(has_settings=settings is not None), parse_mode="HTML")
+        await message.answer("\n".join(lines), reply_markup=get_main_keyboard(has_settings=settings is not None), parse_mode="HTML")
+    except Exception as e:
+        logging.error(f"Week stats error: {e}")
+        await message.answer(f"Ошибка статистики: {e}", reply_markup=get_main_keyboard(has_settings=False))
 
 
 async def show_month_stats_text(message: Message, user_id: int):
