@@ -225,7 +225,7 @@ async def handle_main_button(message: Message, state: FSMContext):
         await message.answer("🤫 Запиши, сколько КБЖУ ты скушал сегодня",
                              reply_markup=get_main_keyboard(has_settings=settings is not None))
 
-    elif text == "📆 К календарю":
+    elif text == "📆 Открыть календарь" or text == "📆 К календарю":
         await state.clear()
         today = date.today()
         kb = get_calendar_keyboard(today.year, today.month)
