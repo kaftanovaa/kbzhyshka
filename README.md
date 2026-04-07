@@ -4,41 +4,54 @@ A Telegram bot for personalised calorie, protein, fat, and carb tracking — log
 
 ---
 
-## Demo
-
-### Main Screen
-![Main Screen](demo_main.png)
-
-### Daily Summary
-![Daily Summary](demo_today.png)
-
-### Weekly Statistics
-![Weekly Statistics](demo_week.png)
-
----
-
 ## Product Context
 
 ### End Users
-People who track their daily nutrition intake — from casual dieters to fitness enthusiasts and athletes.
+People who track their daily nutrition intake.
 
 ### Problem
-Existing nutrition-tracking apps are cluttered, push premium paywalls, use generic norms that don't fit individual bodies, and require too many taps to log a single meal. For users with eating disorders, calorie-focused interfaces can be triggering.
+People want to track daily nutrition, but existing apps are cluttered, push premium paywalls, use generic norms, and require too many taps to log a meal. For users with eating disorders, calorie-focused interfaces can be triggering.
 
 ### Our Solution
-A lightweight Telegram bot that calculates a personalised daily norm (using the Mifflin-St Jeor formula) based on your body, activity level, and goals. Log any meal with a single message in the format `calories/protein/fat/carbs` and instantly see your progress — no ads, no premium walls, no friction.
+Our bot solves this: one message `200/30/15/45` logs calories, protein, fat, and carbs instantly, and shows progress toward a personalised daily norm calculated from the user's body, activity, and goals.
+
+### Stakeholders
+- End-users seeking a quick, stress-free way to log daily nutrition
+- Fitness enthusiasts wanting personalised norms tailored to their body and goals
+
+---
+
+## Project Plan
+
+### Version 1: Core Tracker
+**Features:**
+- Personalised daily norm calculation (gender, weight, height, age, activity level, goal)
+- One-message food logging (calories/protein/fat/carbs)
+- Daily summary with progress tracking (surplus/deficit vs. target)
+- Backend (PostgreSQL) + Telegram client
+
+**Outcome:** A working MVP that delivers the core value: log intake, instantly view progress toward personalized goals.
+
+### Version 2: Analytics & Refinement
+**Features:**
+- Interactive calendar with daily navigation and history view
+- Weekly/monthly statistics with consolidated totals
+- Advanced logging options (per-100g auto-calculation, entry correction/deletion)
+- Deployment hardening, edge-case handling, and integration of TA feedback
+
+**Outcome:** A production-ready app with a complete tracking lifecycle, historical analytics, and a polished UX for sustained use.
 
 ---
 
 ## Features
 
 ### Implemented
-- **Personalised norm calculation** — gender, weight, height, age, activity level, and goal (weight loss, maintenance, or gain)
-- **One-message food logging** — enter `200/30/15/45` to log calories, protein, fat, and carbs instantly
+- **Personalised norm calculation** — gender, weight, height, age, activity level, and goal
+- **One-message food logging** — enter `200/30/15/45` to log calories, protein, fat, and carbs
 - **Per-100g auto-calculation** — enter `100/20/30/40 150` to calculate macros for any portion weight
-- **Daily summary** — view your progress toward personalised targets with clear surplus/deficit indicators
+- **Daily summary** — view your progress toward personalised targets
 - **Interactive calendar** — navigate between days and view historical data
-- **Weekly and monthly statistics** — consolidated totals with norm comparison for each nutrient
+- **Weekly and monthly statistics** — consolidated totals with norm comparison
 - **Entry correction and deletion** — remove or adjust any logged meal
 - **Negative value protection** — values never drop below zero
 - **Reply keyboard navigation** — all main actions accessible via bottom-panel buttons
@@ -46,7 +59,7 @@ A lightweight Telegram bot that calculates a personalised daily norm (using the 
 ### Not Yet Implemented
 - Meal presets (save frequent meals for 1-tap logging)
 - Data export (CSV/JSON download)
-- Natural language input (e.g., "I ate an apple and chicken breast")
+- Natural language input
 - Web dashboard companion
 - Push notifications and reminders
 
@@ -66,7 +79,7 @@ A lightweight Telegram bot that calculates a personalised daily norm (using the 
 ## Deployment
 
 ### Target OS
-Ubuntu 24.04 (or any Linux distribution with Python 3.10+)
+Ubuntu 24.04
 
 ### Prerequisites
 The following must be installed on the VM:
