@@ -20,8 +20,7 @@ A Telegram bot for personalised calorie, protein, fat, and carb tracking — log
 People who track their daily nutrition intake.
 
 ### Problem
-People want to track daily nutrition, but existing apps are cluttered, push premium paywalls, use generic norms, and require too many taps to log a meal. For users with eating disorders, calorie-focused interfaces can be triggering.
-
+People want to track daily nutrition, but existing apps are cluttered, push premium paywalls, use generic norms, and require too many taps to log a meal.
 ### Our Solution
 Our bot solves this: one message `200/30/15/45` logs calories, protein, fat, and carbs instantly, and shows progress toward a personalised daily norm calculated from the user's body, activity, and goals.
 
