@@ -6,11 +6,23 @@ A Telegram bot for personalised calorie, protein, fat, and carb tracking — log
 
 ## Demo
 
+![Personal Norm Calculation](demo_norm.png)
+*Personalised daily norm calculated from user's body, activity level, and goal.*
+
 ![Main Menu](demo_main.png)
 *Main menu with quick-access buttons for daily tracking, calendar, and statistics.*
 
 ![Daily Summary](demo_today.png)
 *Daily summary showing progress toward personalised calorie and macronutrient targets.*
+
+![Interactive Calendar](demo_calendar.png)
+*Navigate through months and view any day's nutrition data with surplus/deficit indicators.*
+
+![Weekly Statistics](demo_week.png)
+*Consolidated weekly totals compared against personalised norms for each macronutrient.*
+
+![Monthly Statistics](demo_month.png)
+*Monthly overview with aggregated values and overall progress toward targets.*
 
 ---
 
