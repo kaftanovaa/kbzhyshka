@@ -1,217 +1,194 @@
-# 🥗 Telegram-бот для подсчета БЖ
+# Calorie Counter
 
-Бот для ежедневного подсчета белков и жиров **без данных о калориях**.
-
----
-
-##  Что нужно сделать ДО запуска бота
-
-### Шаг 1: Создать бота в Telegram
-
-1. Открой Telegram и найди бота **@BotFather** (это официальный бот для создания ботов)
-2. Напиши ему команду `/newbot`
-3. Придумай имя для бота (например: `БЖ Трекер`)
-4. Придумай username для бота (должен заканчиваться на `bot`, например: `my_bj_tracker_bot`)
-5. BotFather выдаст тебе **токен** (длинная строка вида `1234567890:ABCdefGHIjklMNOpqrsTUVwxyz`)
-6. **Сохрани этот токен** — он понадобится для настройки
-
-### Шаг 2: Установить Python (если не установлен)
-
-1. Скачай Python с официального сайта: https://www.python.org/downloads/
-2. При установке **обязательно поставь галочку** "Add Python to PATH"
-3. После установки перезапусти компьютер
-
-### Шаг 3: Установить Git (опционально, для загрузки с GitHub)
-
-1. Скачай Git: https://git-scm.com/download/win
-2. Установи с настройками по умолчанию
+A Telegram bot for personalised calorie, protein, fat, and carb tracking — log your meals in one message and see your progress toward daily goals.
 
 ---
 
-## 🚀 Запуск бота локально (на компьютере)
+## Demo
 
-### Вариант А: Если файлы уже у тебя на компьютере
+### Main Screen
+![Main Screen](demo_main.png)
 
-1. **Открой терминал (командную строку):**
-   - Нажми `Win + R`, введи `cmd`, нажми Enter
-   - Или в VS Code: `Terminal` → `New Terminal`
+### Daily Summary
+![Daily Summary](demo_today.png)
 
-2. **Перейди в папку с ботом:**
-   ```cmd
-   cd c:\kbzhyshka
-   ```
-
-3. **Создай виртуальное окружение (рекомендуется):**
-   ```cmd
-   python -m venv venv
-   ```
-
-4. **Активируй виртуальное окружение:**
-   ```cmd
-   venv\Scripts\activate
-   ```
-   (должно появиться `(venv)` в начале строки)
-
-5. **Установи зависимости:**
-   ```cmd
-   pip install -r requirements.txt
-   ```
-
-6. **Создай файл `.env` с токеном:**
-   - В той же папке создай файл с именем `.env` (без расширения)
-   - Впиши туда:
-     ```
-     BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
-     ```
-   - Замени токен на свой, который получил от BotFather
-
-7. **Запусти бота:**
-   ```cmd
-   python main.py
-   ```
-
-8. **Найди своего бота в Telegram** и нажми `/start`
+### Weekly Statistics
+![Weekly Statistics](demo_week.png)
 
 ---
 
-### Вариант Б: Загрузка с GitHub
+## Product Context
 
-Если ты выложил код на GitHub:
+### End Users
+People who track their daily nutrition intake — from casual dieters to fitness enthusiasts and athletes.
 
-```cmd
-git clone https://github.com/ТВОЙ_НИК/ТВОЙ_РЕПОЗИТОРИЙ.git
-cd ТВОЙ_РЕПОЗИТОРИЙ
-python -m venv venv
-venv\Scripts\activate
+### Problem
+Existing nutrition-tracking apps are cluttered, push premium paywalls, use generic norms that don't fit individual bodies, and require too many taps to log a single meal. For users with eating disorders, calorie-focused interfaces can be triggering.
+
+### Our Solution
+A lightweight Telegram bot that calculates a personalised daily norm (using the Mifflin-St Jeor formula) based on your body, activity level, and goals. Log any meal with a single message in the format `calories/protein/fat/carbs` and instantly see your progress — no ads, no premium walls, no friction.
+
+---
+
+## Features
+
+### Implemented
+- **Personalised norm calculation** — gender, weight, height, age, activity level, and goal (weight loss, maintenance, or gain)
+- **One-message food logging** — enter `200/30/15/45` to log calories, protein, fat, and carbs instantly
+- **Per-100g auto-calculation** — enter `100/20/30/40 150` to calculate macros for any portion weight
+- **Daily summary** — view your progress toward personalised targets with clear surplus/deficit indicators
+- **Interactive calendar** — navigate between days and view historical data
+- **Weekly and monthly statistics** — consolidated totals with norm comparison for each nutrient
+- **Entry correction and deletion** — remove or adjust any logged meal
+- **Negative value protection** — values never drop below zero
+- **Reply keyboard navigation** — all main actions accessible via bottom-panel buttons
+
+### Not Yet Implemented
+- Meal presets (save frequent meals for 1-tap logging)
+- Data export (CSV/JSON download)
+- Natural language input (e.g., "I ate an apple and chicken breast")
+- Web dashboard companion
+- Push notifications and reminders
+
+---
+
+## Usage
+
+1. Open Telegram and search for **@kbzhyshka_bot**
+2. Send `/start` to begin
+3. Complete the onboarding: select gender, enter weight (kg), height (cm), age, activity level, and goal
+4. The bot calculates your personalised daily norm
+5. Log meals by tapping **➕ Add** → select type → enter data in the required format
+6. View your daily summary, calendar, or weekly/monthly statistics using the bottom-panel buttons
+
+---
+
+## Deployment
+
+### Target OS
+Ubuntu 24.04 (or any Linux distribution with Python 3.10+)
+
+### Prerequisites
+The following must be installed on the VM:
+
+```bash
+# Python 3.10+
+sudo apt update
+sudo apt install -y python3 python3-pip python3-venv
+
+# PostgreSQL client libraries (for psycopg2)
+sudo apt install -y libpq-dev python3-dev
+
+# Git
+sudo apt install -y git
+```
+
+### Step-by-Step Deployment
+
+**1. Clone the repository:**
+```bash
+git clone https://github.com/kaftanovaa/se-toolkit-hackathon.git
+cd se-toolkit-hackathon
+```
+
+**2. Create and activate a virtual environment:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+**3. Install dependencies:**
+```bash
 pip install -r requirements.txt
 ```
 
-Затем создай `.env` файл с токеном и запусти `python main.py`
-
----
-
-## ☁️ Деплой на бесплатный хостинг (Railway)
-
-### Шаг 1: Подготовка репозитория на GitHub
-
-1. Зарегистрируйся на https://github.com/ (если ещё нет аккаунта)
-2. Создай новый репозиторий (кнопка "New")
-3. Назови его, например `bj-bot`
-4. Загрузи файлы проекта:
-   
-   **Способ 1 — через Git:**
-   ```cmd
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin https://github.com/ТВОЙ_НИК/bj-bot.git
-   git push -u origin main
-   ```
-
-   **Способ 2 — через веб-интерфейс:**
-   - Просто перетащи файлы в браузер на странице репозитория
-
-5. **Важно:** Не загружай файл `.env` с токеном! Он уже в `.gitignore`
-
-### Шаг 2: Регистрация на Railway
-
-1. Перейди на https://railway.app/
-2. Зарегистрируйся через GitHub (кнопка "Login with GitHub")
-3. Дай разрешение на доступ к репозиториям
-
-### Шаг 3: Создание проекта
-
-1. Нажми **"New Project"**
-2. Выбери **"Deploy from GitHub repo"**
-3. Выбери свой репозиторий `bj-bot`
-4. Нажми **"Deploy"**
-
-### Шаг 4: Настройка переменных окружения
-
-1. В проекте на Railway нажми **"Variables"**
-2. Добавь переменную:
-   - Name: `BOT_TOKEN`
-   - Value: твой токен от BotFather
-3. Нажми **"Add"**
-
-### Шаг 5: Настройка сервиса
-
-Railway автоматически определит Python-проект, но нужно убедиться:
-
-1. В настройках сервиса найди **"Start Command"**
-2. Укажи: `python main.py`
-
-### Шаг 6: Готово!
-
-Бот запущен и работает 24/7. Найди его в Telegram и нажми `/start`
-
----
-
-## 📱 Как пользоваться ботом
-
-1. **/start** — запустить бота, показать главное меню
-2. **Сегодня** — посмотреть БЖ за сегодня
-3. **Добавить ням-ням** — добавить запись (формат: `50/60` или `23,5/22,2`)
-4. **Удалить ням-ням** — удалить запись (формат: `50/60`)
-5. **Открыть календарь** — просмотр данных по дням, навигация по месяцам
-
----
-
-## 🔧 Возможные проблемы и решения
-
-### Ошибка "ModuleNotFoundError: No module named 'aiogram'"
-```cmd
-pip install -r requirements.txt
+**4. Create a `.env` file:**
+```bash
+cp .env.example .env
 ```
 
-### Ошибка "No module named 'dotenv'"
-```cmd
-pip install python-dotenv
+Edit `.env` and add your values:
+```
+BOT_TOKEN=your_telegram_bot_token_here
+DATABASE_URL=postgresql://user:password@host:5432/dbname
 ```
 
-### Бот не отвечает в Telegram
-- Проверь, что токен правильный в `.env`
-- Убедись, что бот запущен (терминал не закрыт)
-- Проверь интернет-соединение
+**5. Obtain a Telegram Bot Token:**
+- Open Telegram and message **@BotFather**
+- Send `/newbot` and follow the prompts
+- Copy the token and paste it into `BOT_TOKEN` in `.env`
 
-### Ошибка при деплое на Railway
-- Проверь, что `BOT_TOKEN` добавлен в Variables
-- Посмотри логи в Railway (вкладка "Deployments" → "View logs")
+**6. Set up PostgreSQL database:**
+```bash
+# Install PostgreSQL
+sudo apt install -y postgresql postgresql-contrib
 
----
+# Create database and user
+sudo -u postgres psql
+CREATE DATABASE calorie_counter;
+CREATE USER counter_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE calorie_counter TO counter_user;
+\q
 
-## 📁 Структура проекта
-
+# Update DATABASE_URL in .env
+DATABASE_URL=postgresql://counter_user:your_password@localhost:5432/calorie_counter
 ```
-kbzhyshka/
-├── main.py           # Основной файл бота
-├── config.py         # Конфигурация (токен)
-├── database.py       # Работа с базой данных
-├── keyboards.py      # Клавиатуры бота
-├── requirements.txt  # Зависимости
-├── .env              # Токен (НЕ загружать на GitHub!)
-├── .env.example      # Пример .env
-├── .gitignore        # Игнорируемые файлы
-└── bj.db             # База данных (создаётся автоматически)
+
+**7. Run the bot:**
+```bash
+python3 main.py
+```
+
+**8. (Optional) Run as a systemd service for persistence:**
+```bash
+sudo nano /etc/systemd/system/calorie-counter.service
+```
+
+Paste the following:
+```ini
+[Unit]
+Description=Calorie Counter Telegram Bot
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/se-toolkit-hackathon
+ExecStart=/home/ubuntu/se-toolkit-hackathon/venv/bin/python3 /home/ubuntu/se-toolkit-hackathon/main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start the service:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable calorie-counter
+sudo systemctl start calorie-counter
+sudo systemctl status calorie-counter
 ```
 
 ---
 
-## 💡 Советы
+## Project Structure
 
-1. **Храни токен в секрете** — не показывай никому файл `.env`
-2. **Не удаляй файл `bj.db`** — там хранятся все твои данные
-3. **Останавливай бота правильно** — нажми `Ctrl+C` в терминале
-4. **Для остановки на Railway** — просто удали проект в личном кабинете
+```
+se-toolkit-hackathon/
+├── main.py           # Bot logic and handlers
+├── config.py         # Environment variable loading
+├── database.py       # PostgreSQL operations
+├── keyboards.py      # Reply and inline keyboard layouts
+├── requirements.txt  # Python dependencies
+├── LICENSE           # MIT License
+├── README.md         # This file
+├── .env.example      # Environment template
+└── .gitignore        # Ignored files
+```
 
 ---
 
-## 🆘 Если что-то пошло не так
+## License
 
-1. Проверь, что Python установлен и добавлен в PATH
-2. Убедись, что все файлы на месте
-3. Перечитай инструкцию шаг за шагом
-4. Посмотри логи ошибок в терминале
-
-Удачи! 
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

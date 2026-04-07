@@ -1,0 +1,166 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{qrcode}
+\usepackage{hyperref}
+\usepackage{fontawesome5}
+\usepackage{xcolor}
+\usepackage{ragged2e}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+% Убираем навигационные символы
+\setbeamertemplate{navigation symbols}{}
+
+\title{\textbf{Calorie Counter}}
+\subtitle{A Telegram bot for personalised calorie, protein, fat, and carb tracking}
+\author{Iuliana Giliazutdinova \\ \textit{\small i.giliazutdinova@innopolis.university}}
+\institute{Innopolis University \\ Group B25-DSAI-02}
+\date{\today}
+
+\begin{document}
+
+% ==================== СЛАЙД 1: Титульный ====================
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+% ==================== СЛАЙД 2: Контекст ====================
+\begin{frame}{Context}
+    \vspace{0.3cm}
+    
+    \begin{block}{\faUser{} End-User}
+        People who track their daily nutrition intake.
+    \end{block}
+
+    \vspace{0.3cm}
+    
+    \begin{block}{\faExclamationTriangle{} What Problem Does It Solve?}
+        People want to track daily nutrition, but existing apps are cluttered, push premium paywalls, use generic norms, and require too many taps to log a meal. For users with eating disorders, calorie-focused interfaces can be triggering.
+    \end{block}
+
+    \vspace{0.3cm}
+    
+    \begin{alertblock}{\faLightbulb{} The Product Idea in One Sentence}
+        Our bot solves this: one message \texttt{200/30/15/45} logs calories, protein, fat, and carbs instantly, and shows progress toward a personalised daily norm calculated from the user's body, activity, and goals.
+    \end{alertblock}
+\end{frame}
+
+% ==================== СЛАЙД 3: Реализация ====================
+\begin{frame}{Implementation}
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \begin{block}{\faCode{} How It Was Built}
+                \begin{itemize}
+                    \small
+                    \item \textbf{Backend:} Python + aiogram 3.x
+                    \item \textbf{Database:} PostgreSQL (Railway)
+                    \item \textbf{Client:} Telegram Bot API
+                    \item \textbf{Deploy:} Railway.app
+                \end{itemize}
+            \end{block}
+
+            \begin{block}{\faUsers{} Stakeholders}
+                \begin{itemize}
+                    \small
+                    \item End-users seeking a quick, stress-free way to log daily nutrition
+                    \item Fitness enthusiasts wanting personalised norms tailored to their body and goals
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \begin{block}{\faCogs{} Version 1: Core Tracker}
+                \begin{itemize}
+                    \small
+                    \item Personalised daily norm calculation (gender, weight, height, age, activity level, goal)
+                    \item One-message food logging (calories/protein/fat/carbs)
+                    \item Daily summary with progress tracking
+                    \item Backend (PostgreSQL) + Telegram client
+                \end{itemize}
+                \smallskip
+                \textbf{Outcome:} A working MVP that delivers the core value: log intake, instantly view progress toward personalised goals.
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% ==================== СЛАЙД 4: Демо ====================
+\begin{frame}{Demo: Version 2}
+    \vspace{0.3cm}
+    
+    \begin{columns}[T]
+        \begin{column}{0.55\textwidth}
+            \begin{block}{\faRocket{} Version 2: Analytics \& Refinement}
+                \begin{itemize}
+                    \small
+                    \item Interactive calendar with daily navigation and history view
+                    \item Weekly/monthly statistics with consolidated totals
+                    \item Advanced logging options (per-100g auto-calculation, entry correction/deletion)
+                    \item Deployment hardening, edge-case handling, and integration of TA feedback
+                \end{itemize}
+                \smallskip
+                \textbf{Outcome:} A production-ready app with a complete tracking lifecycle, historical analytics, and a polished UX for sustained use.
+            \end{block}
+        \end{column}
+        \begin{column}{0.45\textwidth}
+            \begin{center}
+                \Huge \faVideoCamera{}
+                \vspace{0.2cm}
+                
+                \textbf{Video Demonstration}
+                \vspace{0.3cm}
+                
+                \href{https://www.youtube.com/watch?v=YOUR_VIDEO_ID}{
+                    \color{blue}\underline{Watch the demo (under 2 min)}
+                }
+                
+                \vspace{0.3cm}
+                \small
+                \textit{The video shows the full user journey from registration to viewing weekly stats.}
+            \end{center}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% ==================== СЛАЙД 5: Ссылки ====================
+\begin{frame}{Links}
+    \vspace{0.3cm}
+    
+    \begin{columns}[T]
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \faGithub{} \textbf{GitHub Repository}
+                \vspace{0.3cm}
+                
+                \href{https://github.com/kaftanovaa/kbzhyshka}{
+                    \color{blue}\underline{github.com/kaftanovaa/kbzhyshka}
+                }
+                
+                \vspace{0.3cm}
+                
+                \qrcode[height=3.5cm]{https://github.com/kaftanovaa/kbzhyshka}
+            \end{center}
+        \end{column}
+
+        \begin{column}{0.5\textwidth}
+            \begin{center}
+                \faRocket{} \textbf{Deployed Product}
+                \vspace{0.3cm}
+                
+                \href{https://t.me/kbzhyshka_bot}{
+                    \color{blue}\underline{@kbzhyshka\_bot}
+                }
+                
+                \vspace{0.3cm}
+                
+                \qrcode[height=3.5cm]{https://t.me/kbzhyshka_bot}
+            \end{center}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\end{document}
